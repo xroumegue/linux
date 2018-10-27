@@ -15790,6 +15790,14 @@ L:	linux-usb@vger.kernel.org
 S:	Maintained
 F:	drivers/usb/roles/intel-xhci-usb-role-switch.c
 
+USB IP DRIVER FOR HISILICON KIRIN
+M:	Yu Chen <chenyu56@huawei.com>
+M:	Binghui Wang <wangbinghui@hisilicon.com>
+L:	linux-usb@vger.kernel.org
+S:	Maintained
+F:	Documentation/devicetree/bindings/usb/dwc3-hisi.txt
+F:	drivers/usb/dwc3/dwc3-hisi.c
+
 USB ISP116X DRIVER
 M:	Olav Kongas <ok@artecdesign.ee>
 L:	linux-usb@vger.kernel.org
