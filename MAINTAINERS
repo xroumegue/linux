@@ -15796,7 +15796,9 @@ M:	Binghui Wang <wangbinghui@hisilicon.com>
 L:	linux-usb@vger.kernel.org
 S:	Maintained
 F:	Documentation/devicetree/bindings/usb/dwc3-hisi.txt
+F:	Documentation/devicetree/bindings/phy/phy-hi3660-usb3.txt
 F:	drivers/usb/dwc3/dwc3-hisi.c
+F:	drivers/phy/hisilicon/phy-hi3660-usb3.c
 
 USB ISP116X DRIVER
 M:	Olav Kongas <ok@artecdesign.ee>
