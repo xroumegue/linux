@@ -1,0 +1,24 @@
+Support usb hub and usb data role switch of Hisilicon HiKey&HiKey960 Board.
+
+-----------------------------
+
+Required properties:
+- compatible: "hisilicon,gpio_hubv1","hisilicon,hikey960_usb"
+- typc_vbus_int_gpio,typec-gpios: gpio to control the vbus of typeC port
+- typc_vbus_enable_val: gpio value that enable the vbus of typeC port
+- otg_gpio: gpio to switch DP&DM between the hub and typeC port
+- hub_vdd33_en_gpio: gpio to enable the power of hub
+- pinctrl-0: pinctrl config
+
+Example
+-----
+
+	hisi_hikey_usb: hisi_hikey_usb {
+		compatible = "hisilicon,hikey960_usb";
+		typc_vbus_int_gpio,typec-gpios = <&gpio25 2 0>;
+		typc_vbus_enable_val = <1>;
+		otg_gpio = <&gpio25 6 0>;
+		hub_vdd33_en_gpio = <&gpio5 6 0>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&usbhub5734_pmx_func>;
+	};
