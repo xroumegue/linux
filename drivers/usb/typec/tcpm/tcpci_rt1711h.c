@@ -39,6 +39,7 @@ struct rt1711h_chip {
 	struct tcpci_data data;
 	struct tcpci *tcpci;
 	struct device *dev;
+	struct device_connection dev_conn;
 };
 
 static int rt1711h_read16(struct rt1711h_chip *chip, unsigned int reg, u16 *val)
@@ -237,6 +238,7 @@ static int rt1711h_probe(struct i2c_client *client,
 {
 	int ret;
 	struct rt1711h_chip *chip;
+	const char *dev_conn_end;
 
 	ret = rt1711h_check_revision(client);
 	if (ret < 0) {
@@ -254,6 +256,7 @@ static int rt1711h_probe(struct i2c_client *client,
 		return PTR_ERR(chip->data.regmap);
 
 	chip->dev = &client->dev;
+	dev_set_name(chip->dev, "rt1711h");
 	i2c_set_clientdata(client, chip);
 
 	ret = rt1711h_sw_reset(chip);
@@ -263,6 +266,15 @@ static int rt1711h_probe(struct i2c_client *client,
 	ret = rt1711h_init_alert(chip, client);
 	if (ret < 0)
 		return ret;
+
+	ret = device_property_read_string(chip->dev, "dev-conn-end",
+			&dev_conn_end);
+	if (!ret) {
+		chip->dev_conn.endpoint[0] = "rt1711h";
+		chip->dev_conn.endpoint[1] = dev_conn_end;
+		chip->dev_conn.id = "usb-role-switch";
+		device_connection_add(&chip->dev_conn);
+	}
 
 	chip->data.init = rt1711h_init;
 	chip->data.set_vconn = rt1711h_set_vconn;
@@ -279,6 +291,9 @@ static int rt1711h_remove(struct i2c_client *client)
 	struct rt1711h_chip *chip = i2c_get_clientdata(client);
 
 	tcpci_unregister_port(chip->tcpci);
+	if (chip->dev_conn.id)
+		device_connection_remove(&chip->dev_conn);
+
 	return 0;
 }
 
