@@ -447,6 +447,7 @@ static const struct dw_mci_drv_data hi3660_data = {
 
 static const struct of_device_id dw_mci_k3_match[] = {
 	{ .compatible = "hisilicon,hi3660-dw-mshc", .data = &hi3660_data, },
+	{ .compatible = "hisilicon,hi3670-dw-mshc", .data = &hi3660_data, },
 	{ .compatible = "hisilicon,hi4511-dw-mshc", .data = &k3_drv_data, },
 	{ .compatible = "hisilicon,hi6220-dw-mshc", .data = &hi6220_data, },
 	{},
