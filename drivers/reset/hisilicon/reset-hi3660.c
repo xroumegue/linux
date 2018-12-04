@@ -103,6 +103,7 @@ static int hi3660_reset_probe(struct platform_device *pdev)
 
 static const struct of_device_id hi3660_reset_match[] = {
 	{ .compatible = "hisilicon,hi3660-reset", },
+	{ .compatible = "hisilicon,hi3670-reset", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, hi3660_reset_match);
