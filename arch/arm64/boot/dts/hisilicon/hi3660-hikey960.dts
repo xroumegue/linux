@@ -636,7 +636,6 @@
 };
 
 &dwmmc2 { /* WIFI */
-	bus-width = <0x4>;
 	non-removable;
 	broken-cd;
 	cap-power-off-card;
