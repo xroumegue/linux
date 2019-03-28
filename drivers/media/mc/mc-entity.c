@@ -509,7 +509,7 @@ __must_check int __media_pipeline_start(struct media_pad *pad,
 
 		ret = 0;
 
-		media_entity_for_each_pad(entity, iter) {
+		media_entity_for_each_routed_pad(pad, iter) {
 			if (iter->pipe && iter->pipe != pipe) {
 				pr_err("Pipe active for %s. Can't start for %s\n",
 				       entity->name, iter->entity->name);
@@ -601,7 +601,7 @@ error:
 	while ((pad_err = media_graph_walk_next(graph))) {
 		struct media_pad *iter;
 
-		media_entity_for_each_pad(pad_err->entity, iter)
+		media_entity_for_each_routed_pad(pad_err, iter)
 			iter->pipe = NULL;
 
 		/*
@@ -651,7 +651,7 @@ void __media_pipeline_stop(struct media_pad *pad)
 	while ((pad = media_graph_walk_next(graph))) {
 		struct media_pad *iter;
 
-		media_entity_for_each_pad(pad->entity, iter)
+		media_entity_for_each_routed_pad(pad, iter)
 			iter->pipe = NULL;
 	}
 
