@@ -445,23 +445,30 @@ __must_check int __media_pipeline_start(struct media_entity *entity,
 
 	while ((pad = media_graph_walk_next(graph))) {
 		struct media_entity *entity = pad->entity;
+		bool skip_validation = media_pad_is_streaming(pad);
+		struct media_pad *iter;
 
 		DECLARE_BITMAP(active, MEDIA_ENTITY_MAX_PADS);
 		DECLARE_BITMAP(has_no_links, MEDIA_ENTITY_MAX_PADS);
 
-		if (entity->pipe && entity->pipe != pipe) {
-			pr_err("Pipe active for %s. Can't start for %s\n",
-				entity->name,
-				pad_err->entity->name);
-			ret = -EBUSY;
-			goto error;
+		ret = 0;
+
+		media_entity_for_each_pad(entity, iter) {
+			if (iter->pipe && iter->pipe != pipe) {
+				pr_err("Pipe active for %s. Can't start for %s\n",
+				       entity->name, iter->entity->name);
+				ret = -EBUSY;
+			} else {
+				iter->pipe = pipe;
+			}
 		}
 
-		/* Already streaming --- no need to check. */
-		if (entity->pipe)
-			continue;
+		if (ret)
+			goto error;
 
-		entity->pipe = pipe;
+		/* Already part of the pipeline, skip validation. */
+		if (skip_validation)
+			continue;
 
 		if (!entity->ops || !entity->ops->link_validate)
 			continue;
@@ -531,15 +538,16 @@ error:
 	media_graph_walk_start(graph, pad_err);
 
 	while ((pad_err = media_graph_walk_next(graph))) {
-		struct media_entity *entity_err = pad_err->entity;
+		struct media_pad *iter;
 
-		entity_err->pipe = NULL;
+		media_entity_for_each_pad(pad_err->entity, iter)
+			iter->pipe = NULL;
 
 		/*
 		 * We haven't started entities further than this so we quit
 		 * here.
 		 */
-		if (pad_err == pad)
+		if (pad_err->entity == pad->entity)
 			break;
 	}
 
@@ -564,7 +572,7 @@ EXPORT_SYMBOL_GPL(media_pipeline_start);
 
 void __media_pipeline_stop(struct media_entity *entity)
 {
-	struct media_pipeline *pipe = entity->pipe;
+	struct media_pipeline *pipe = entity->pads->pipe;
 	struct media_graph *graph = &pipe->graph;
 	struct media_pad *pad;
 
@@ -581,9 +589,10 @@ void __media_pipeline_stop(struct media_entity *entity)
 	media_graph_walk_start(graph, entity->pads);
 
 	while ((pad = media_graph_walk_next(graph))) {
-		struct media_entity *entity = pad->entity;
+		struct media_pad *iter;
 
-		entity->pipe = NULL;
+		media_entity_for_each_pad(pad->entity, iter)
+			iter->pipe = NULL;
 	}
 
 	media_graph_walk_cleanup(graph);
@@ -855,7 +864,7 @@ int __media_entity_setup_link(struct media_link *link, u32 flags)
 {
 	const u32 mask = MEDIA_LNK_FL_ENABLED;
 	struct media_device *mdev;
-	struct media_entity *source, *sink;
+	struct media_pad *source, *sink;
 	int ret = -EBUSY;
 
 	if (link == NULL)
@@ -871,12 +880,11 @@ int __media_entity_setup_link(struct media_link *link, u32 flags)
 	if (link->flags == flags)
 		return 0;
 
-	source = link->source->entity;
-	sink = link->sink->entity;
+	source = link->source;
+	sink = link->sink;
 
 	if (!(link->flags & MEDIA_LNK_FL_DYNAMIC) &&
-	    (media_entity_is_streaming(source) ||
-	     media_entity_is_streaming(sink)))
+	    (media_pad_is_streaming(source) || media_pad_is_streaming(sink)))
 		return -EBUSY;
 
 	mdev = source->graph_obj.mdev;
