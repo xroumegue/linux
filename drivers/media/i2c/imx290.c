@@ -1581,6 +1581,7 @@ static int imx290_probe(struct i2c_client *client)
 {
 	struct device *dev = &client->dev;
 	struct imx290 *imx290;
+	u32 chip_id;
 	int ret;
 
 	imx290 = devm_kzalloc(dev, sizeof(*imx290), GFP_KERNEL);
@@ -1622,13 +1623,21 @@ static int imx290_probe(struct i2c_client *client)
 	/*
 	 * Enable power management. The driver supports runtime PM, but needs to
 	 * work when runtime PM is disabled in the kernel. To that end, power
-	 * the sensor on manually here.
+	 * the sensor on manually here, identify it, and fully initialize it.
 	 */
 	ret = imx290_power_on(imx290);
 	if (ret < 0) {
 		dev_err(dev, "Could not power on the device\n");
 		return ret;
 	}
+
+	ret = imx290_read(imx290, IMX290_CHIP_ID, &chip_id);
+	if (ret) {
+		dev_err(dev, "Could not read chip ID: %d\n", ret);
+		goto err_power;
+	}
+
+	dev_info(dev, "chip ID 0x%04x\n", chip_id);
 
 	/*
 	 * Enable runtime PM with autosuspend. As the device has been powered
@@ -1674,6 +1683,7 @@ err_subdev:
 err_pm:
 	pm_runtime_disable(dev);
 	pm_runtime_put_noidle(dev);
+err_power:
 	imx290_power_off(imx290);
 	return ret;
 }
