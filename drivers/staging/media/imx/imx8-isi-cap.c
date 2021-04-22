@@ -116,6 +116,7 @@ static int mxc_isi_pipeline_enable(struct mxc_isi_cap_dev *isi_cap, bool enable)
 	struct media_entity *entity = &isi_cap->vdev.entity;
 	struct media_device *mdev = entity->graph_obj.mdev;
 	struct media_graph graph;
+	struct media_pad *pad;
 	struct v4l2_subdev *subdev;
 	int ret = 0;
 
@@ -128,7 +129,9 @@ static int mxc_isi_pipeline_enable(struct mxc_isi_cap_dev *isi_cap, bool enable)
 	}
 	media_graph_walk_start(&graph, entity->pads);
 
-	while ((entity = media_graph_walk_next(&graph))) {
+	while ((pad = media_graph_walk_next(&graph))) {
+		entity = pad->entity;
+
 		if (!entity) {
 			dev_dbg(dev, "entity is NULL\n");
 			continue;
