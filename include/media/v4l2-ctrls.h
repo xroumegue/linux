@@ -118,6 +118,26 @@ struct v4l2_ctrl_ops {
 };
 
 /**
+ * struct v4l2_ctrl_handler_ops - The control handler operations that the driver
+ *				  has to provide.
+ *
+ * @begin: Called by the control framework to signal the beginning of a control
+ *	set operation, before the first control of a group is set. This can be
+ *	used by drivers to control register group hold, in order to apply
+ *	multiple control writes atomically. Optional.
+ * @end: Called by the control framework to signal the end of a control set
+ *	operation, after the last control of a group is set. This operation is
+ *	called if and only if the @begin operation is called and returns
+ *	without an error. The success parameter is set to true if all control
+ *	writes have succeeded, and to false otherwise. Must be provided if and
+ *	only if @begin is also provided.
+ */
+struct v4l2_ctrl_handler_ops {
+	int (*begin)(struct v4l2_ctrl_handler *hdl);
+	int (*end)(struct v4l2_ctrl_handler *hdl, bool success);
+};
+
+/**
  * struct v4l2_ctrl_type_ops - The control type operations that the driver
  *			       has to provide.
  *
@@ -360,6 +380,7 @@ struct v4l2_ctrl_ref {
  * @_lock:	Default for "lock".
  * @lock:	Lock to control access to this handler and its controls.
  *		May be replaced by the user right after init.
+ * @ops:	The control handler operations. Optional.
  * @ctrls:	The list of controls owned by this handler.
  * @ctrl_refs:	The list of control references.
  * @cached:	The last found control reference. It is common that the same
@@ -388,6 +409,7 @@ struct v4l2_ctrl_ref {
 struct v4l2_ctrl_handler {
 	struct mutex _lock;
 	struct mutex *lock;
+	const struct v4l2_ctrl_handler_ops *ops;
 	struct list_head ctrls;
 	struct list_head ctrl_refs;
 	struct v4l2_ctrl_ref *cached;
