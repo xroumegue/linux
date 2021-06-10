@@ -170,6 +170,55 @@ static void vc_mipi_clk_cleanup(struct vc_mipi_ctrl *ctrl)
  * Probe & Remove
  */
 
+/*
+ * Due to a bug in the firmware, I2C reads with address increment return the
+ * first byte twice. The dummy byte at the beginning of the ROM descriptor
+ * works around the issue, at the cost of requiring unaligned accesses.
+ */
+struct vc_mipi_descriptor_rom {
+	u8 dummy;
+	u8 magic[12];
+	u8 manufacturer[32];
+	__le16 mipi_mid;
+	u8 sensor_manufacturer[8];
+	u8 sensor_model[16];
+	__le16 module_id;
+	__le16 module_rev;
+} __packed;
+
+static int vc_mipi_identify(struct vc_mipi_ctrl *ctrl)
+{
+	struct vc_mipi_descriptor_rom rom;
+	unsigned int addr;
+	int ret;
+
+	ret = regmap_raw_read(ctrl->regmap, VC_MIPI_REG_ROM, &rom, sizeof(rom));
+	if (ret < 0) {
+		dev_err(ctrl->dev, "Failed to read ROM: %d\n", ret);
+		return ret;
+	}
+
+
+	if (memcmp(&rom.magic, "mipi-module", sizeof(rom.magic))) {
+		dev_err(ctrl->dev, "Invalid ROM magic value\n");
+		print_hex_dump(KERN_INFO, "rom: ", DUMP_PREFIX_OFFSET, 16, 1,
+			       &rom, sizeof(rom), true);
+		return -EINVAL;
+	}
+
+	ret = regmap_read(ctrl->regmap, VC_MIPI_REG_SENSOR_ADDR, &addr);
+	if (ret < 0) {
+		dev_err(ctrl->dev, "Failed to read sensor address: %d\n", ret);
+		return ret;
+	}
+
+	dev_info(ctrl->dev, "%.8s %.16s (%04x:%04x @0x%02x)\n",
+		 rom.sensor_manufacturer, rom.sensor_model,
+		 le16_to_cpu(rom.module_id), le16_to_cpu(rom.module_rev), addr);
+
+	return 0;
+}
+
 static const struct regmap_config vc_mipi_regmap_config = {
 	.reg_bits = 16,
 	.val_bits = 8,
@@ -179,7 +228,6 @@ static const struct regmap_config vc_mipi_regmap_config = {
 static int vc_mipi_i2c_probe(struct i2c_client *i2c)
 {
 	struct vc_mipi_ctrl *ctrl;
-	char data[12];
 	int ret;
 
 	ctrl = devm_kzalloc(&i2c->dev, sizeof(*ctrl), GFP_KERNEL);
@@ -210,20 +258,9 @@ static int vc_mipi_i2c_probe(struct i2c_client *i2c)
 		goto error;
 	}
 
-	ret = regmap_raw_read(ctrl->regmap, VC_MIPI_REG_ROM, data,
-			      sizeof(data));
-	if (ret < 0) {
-		dev_err(ctrl->dev, "Failed to read ROM: %d\n", ret);
+	ret = vc_mipi_identify(ctrl);
+	if (ret < 0)
 		goto error;
-	}
-
-	if (memcmp(data, "mmipi-module", sizeof(data))) {
-		dev_err(ctrl->dev, "Invalid ROM magic value\n");
-		print_hex_dump(KERN_INFO, "rom: ", DUMP_PREFIX_OFFSET, 16, 1,
-			       data, sizeof(data), true);
-		ret = -EINVAL;
-		goto error;
-	}
 
 	ret = vc_mipi_regulator_init(ctrl);
 	if (ret < 0) {
