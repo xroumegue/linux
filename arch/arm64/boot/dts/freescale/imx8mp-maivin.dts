@@ -49,8 +49,6 @@
 
 /* Verdin I2C_4_CSI */
 &i2c3 {
-	#address-cells = <1>;
-	#size-cells = <0>;
 	status = "okay";
 
 	camera@3c {
