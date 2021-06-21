@@ -21,14 +21,6 @@
 		gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 	};
-
-	trigger_enable: trigger_enable_pin {
-		compatible = "regulator-fixed";
-		regulator-name = "trigger_ov5640";
-		pinctrl-0 = <&pinctrl_trigger>;
-		gpio = <&gpio4 3 GPIO_ACTIVE_HIGH>;
-		enable-active-high;
-	};
 };
 
 /* Disable IEEE power saving */
@@ -66,7 +58,6 @@
 		assigned-clock-rates = <24000000>;
 		AVDD-supply = <&csi_enable>;
 		DVDD-supply = <&csi_enable>;
-		DOVDD-supply = <&trigger_enable>;
 		compatible = "ovti,ov5640";
 		clock-names = "xclk";
 		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
