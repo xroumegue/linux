@@ -92,6 +92,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi1-imx296.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi1-imx327.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi1-ov5640.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi2-imx296.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi2-imx327.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-msc-sm2s-ep1.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-phyboard-pollux-rdk.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mpxl.dtb
