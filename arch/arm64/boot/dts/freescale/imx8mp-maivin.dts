@@ -14,10 +14,10 @@
 		     "toradex,verdin-imx8mp",
 		     "fsl,imx8mp";
 
-	csi_enable: regulator-csi {
+	csi_3v3: csi-3v3-regulator {
 		compatible = "regulator-fixed";
-		regulator-name = "csi-enable";
-		pinctrl-0 = <&pinctrl_csenable>;
+		regulator-name = "CSI_3V3";
+		pinctrl-0 = <&pinctrl_csi_3v3>;
 		gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 	};
@@ -56,8 +56,8 @@
 		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
 		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
 		assigned-clock-rates = <24000000>;
-		AVDD-supply = <&csi_enable>;
-		DVDD-supply = <&csi_enable>;
+		AVDD-supply = <&csi_3v3>;
+		DVDD-supply = <&csi_3v3>;
 		compatible = "ovti,ov5640";
 		clock-names = "xclk";
 		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
@@ -167,7 +167,7 @@
 		>;
 	};
 
-	pinctrl_csenable: csenable {
+	pinctrl_csi_3v3: csi-3v3-grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_NAND_DATA01__GPIO3_IO07		0x184	/* SODIMM 58 */
 		>;
