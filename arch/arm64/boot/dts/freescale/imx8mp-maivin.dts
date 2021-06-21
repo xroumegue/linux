@@ -33,12 +33,12 @@
 
 /* Verdin CAN_1 */
 &flexcan1 {
-	status = "enabled";
+	status = "okay";
 };
 
 /* Verdin CAN_2 */
 &flexcan2 {
-	status = "enabled";
+	status = "okay";
 };
 
 /* Disable IEEE power saving */
@@ -50,7 +50,7 @@
 /* On-module I2C */
 &i2c1 {
 	rear_connector_eeprom@50 {
-		status = "enabled";
+		status = "okay";
 	};
 };
 
@@ -80,7 +80,7 @@
 		compatible = "st,24c02";
 		pagesize = <16>;
 		reg = <0x57>;
-		status = "enabled";
+		status = "okay";
 	};
 };
 
