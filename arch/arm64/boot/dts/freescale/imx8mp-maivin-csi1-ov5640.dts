@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Copyright 2021 Au-Zone
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/clock/imx8mp-clock.h>
+
+/ {
+	fragment@0 {
+		target = <&i2c3>;
+		__overlay__ {
+			camera@3c {
+				assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
+				assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
+				assigned-clock-rates = <24000000>;
+				AVDD-supply = <&csi_3v3>;
+				DVDD-supply = <&csi_3v3>;
+				compatible = "ovti,ov5640";
+				clock-names = "xclk";
+				clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
+				csi_id = <0>;
+				mclk = <24000000>;
+				mclk_source = <0>;
+				mipi_csi;
+				pinctrl-names = "default";
+				reg = <0x3c>;
+
+				port {
+					ov5640_mipi_0_ep: endpoint {
+						clock-lanes = <0>;
+						data-lanes = <1 2>;
+						remote-endpoint = <&mipi_csi0_ep>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&isi_0>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@2 {
+		target = <&mipi_csi_0>;
+		__overlay__ {
+			status = "okay";
+
+			ports {
+				port@0 {
+					mipi_csi0_ep: endpoint {
+						data-lanes = <1 2>;
+						remote-endpoint = <&ov5640_mipi_0_ep>;
+					};
+				};
+			};
+		};
+	};
+};
