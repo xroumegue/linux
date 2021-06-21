@@ -213,7 +213,7 @@
 };
 
 /* Verdin UART_1 */
-/* Enabling RS-245 operation */
+/* Enabling RS-485 operation */
 &uart1 {
 	fsl,uart-has-rtscts;
 	linux,rs485-enabled-at-boot-time;
