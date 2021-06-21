@@ -14,7 +14,7 @@
 		     "toradex,verdin-imx8mp",
 		     "fsl,imx8mp";
 
-	csi_enable: csi_enable_pin {
+	csi_enable: regulator-csi {
 		compatible = "regulator-fixed";
 		regulator-name = "csi-enable";
 		pinctrl-0 = <&pinctrl_csenable>;
@@ -60,7 +60,7 @@
 	#size-cells = <0>;
 	status = "okay";
 
-	ov5640_mipi@3c {
+	camera@3c {
 		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
 		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
 		assigned-clock-rates = <24000000>;
@@ -90,12 +90,12 @@
 /* Verdin I2C_1 */
 &i2c4 {
 	/* To be compatible with old versions of the board */
-	tmp102@4a {
+	temp-sensor@4a {
 		compatible = "ti,tmp102","tmp102";
 		reg = <0x4a>;
 	};
 
-	tmp102@4b {
+	temp-sensor@4b {
 		compatible = "ti,tmp102", "tmp102";
 		reg = <0x4b>;
 	};
@@ -107,7 +107,8 @@
 		reg = <0x54>;
 	};
 
-	cpu_eeprom@57 {
+	/* EEPROM on the carrier board */
+	eeprom@57 {
 		compatible = "st,24c02";
 		pagesize = <16>;
 		reg = <0x57>;
