@@ -89,15 +89,15 @@
 
 /* Verdin I2C_1 */
 &i2c4 {
-	temp_sensor: tmp102@4b {
-		compatible = "ti,tmp102", "tmp102";
-		reg = <0x4b>;
-	};
-
 	/* To be compatible with old versions of the board */
 	temp_sensor_old: tmp102@4a {
 		compatible = "ti,tmp102", "tmp102";
 		reg = <0x4a>;
+	};
+
+	temp_sensor: tmp102@4b {
+		compatible = "ti,tmp102", "tmp102";
+		reg = <0x4b>;
 	};
 
 	/* EEPROM on the rear connector interface */
