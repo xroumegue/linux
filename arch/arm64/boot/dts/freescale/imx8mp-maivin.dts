@@ -77,6 +77,8 @@
 
 /* Verdin I2C_1 */
 &i2c4 {
+	status = "okay";
+
 	/* To be compatible with old versions of the board */
 	temp-sensor@4a {
 		compatible = "ti,tmp102","tmp102";
@@ -94,13 +96,11 @@
 		pagesize = <16>;
 		reg = <0x54>;
 	};
+};
 
-	/* EEPROM on the carrier board */
-	eeprom@57 {
-		compatible = "st,24c02";
-		pagesize = <16>;
-		reg = <0x57>;
-	};
+/* EEPROM on the carrier board */
+&eeprom_carrier_board {
+	status = "okay";
 };
 
 &iomuxc {
