@@ -14,21 +14,21 @@
 		     "toradex,verdin-imx8mp",
 		     "fsl,imx8mp";
 
-    csi_enable:csi_enable_pin{
+	csi_enable: csi_enable_pin {
 		compatible = "regulator-fixed";
 		regulator-name = "csi-enable";
-        pinctrl-0 = <&pinctrl_csenable>;
-        gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
-        enable-active-high;
-    };
+		pinctrl-0 = <&pinctrl_csenable>;
+		gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
 
-    trigger_enable:trigger_enable_pin{
+	trigger_enable: trigger_enable_pin {
 		compatible = "regulator-fixed";
 		regulator-name = "trigger_ov5640";
-        pinctrl-0 = <&pinctrl_trigger>;
-        gpio = <&gpio4 3 GPIO_ACTIVE_HIGH>;
-        enable-active-high;
-    };
+		pinctrl-0 = <&pinctrl_trigger>;
+		gpio = <&gpio4 3 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
 };
 
 /* Verdin CAN_1 */
@@ -41,17 +41,16 @@
 	status = "enabled";
 };
 
-//Disable IEEE power saving
-&ethphy0{
-    eee-broken-100tx;
-    eee-broken-1000t;
+/* Disable IEEE power saving */
+&ethphy0 {
+	eee-broken-100tx;
+	eee-broken-1000t;
 };
 
 /* On-module I2C */
 &i2c1 {
-
 	rear_connector_eeprom@50 {
-        status = "enabled";
+		status = "enabled";
 	};
 };
 
@@ -64,98 +63,98 @@
 
 /* Verdin I2C_1 */
 &i2c4 {
-
-	temp_sensor:tmp102@4b {
-		compatible = "ti,tmp102","tmp102";
+	temp_sensor: tmp102@4b {
+		compatible = "ti,tmp102", "tmp102";
 		reg = <0x4b>;
-		status="okay";
+		status = "okay";
 	};
 
-    //To be compatible with old versions of the board
-	temp_sensor_old:tmp102@4a {
-		compatible = "ti,tmp102","tmp102";
+	/* To be compatible with old versions of the board */
+	temp_sensor_old: tmp102@4a {
+		compatible = "ti,tmp102", "tmp102";
 		reg = <0x4a>;
-		status="okay";
+		status = "okay";
 	};
 
 	cpu_eeprom@57 {
 		compatible = "st,24c02";
 		pagesize = <16>;
 		reg = <0x57>;
-        status = "enabled";
+		status = "enabled";
 	};
 };
 
 /* Verdin UART_1 */
-//Enabling RS-245 operation
+/* Enabling RS-245 operation */
 &uart1 {
 	fsl,uart-has-rtscts;
 	linux,rs485-enabled-at-boot-time;
 };
 
 &iomuxc {
-
-    pinctrl-0 = <&pinctrl_gpio1>, <&pinctrl_gpio2>,
-        <&pinctrl_gpio3>, <&pinctrl_gpio4>,
-        <&pinctrl_gpio_hog1>, <&pinctrl_gpio_hog2>, <&pinctrl_gpio_hog3>,
-        <&pinctrl_hdmi_hog>, <&pinctrl_pmic_tpm_ena>;
+	pinctrl-0 = <&pinctrl_gpio1>, <&pinctrl_gpio2>,
+		    <&pinctrl_gpio3>, <&pinctrl_gpio4>,
+		    <&pinctrl_gpio_hog1>, <&pinctrl_gpio_hog2>, <&pinctrl_gpio_hog3>,
+		    <&pinctrl_hdmi_hog>, <&pinctrl_pmic_tpm_ena>;
 
 	pinctrl_flexspi0: flexspi0grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_NAND_READY_B__GPIO3_IO16		0x1C4	/* SODIMM 64 */
-			/*Setting bit 8(Pull up select field) high to enable pull
-			Setting bit 7(Input select field) high to use Schmitt
-			Setting bit 2(Drive strength field) high
-			Setting bit 6(Pull Up/Down config field) high
-			This needs to be a pull up since when the SW1 switch is pressed it is
-			shorting this pin to ground */
+			/*
+			 * Setting bit 8(Pull up select field) high to enable pull
+			 * Setting bit 7(Input select field) high to use Schmitt
+			 * Setting bit 2(Drive strength field) high
+			 * Setting bit 6(Pull Up/Down config field) high
+			 * This needs to be a pull up since when the SW1 switch is pressed it is
+			 * shorting this pin to ground
+			 */
 
 			MX8MP_IOMUXC_NAND_DATA00__FLEXSPI_A_DATA00	0x82	/* SODIMM 56 */
 			MX8MP_IOMUXC_NAND_DATA03__FLEXSPI_A_DATA03	0x82	/* SODIMM 62 */
 		>;
 	};
 
-    /*Used to enable DAC U5 output*/
+	/* Used to enable DAC U5 output */
 	pinctrl_pwm_1: pwm1grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_SPDIF_EXT_CLK__GPIO5_IO05		0x184	/* SODIMM 15 */
 		>;
 	};
 
-    /*Used to enable DAC U6 output*/
+	/* Used to enable DAC U6 output */
 	pinctrl_pwm_2: pwm2grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_GPIO1_IO11__GPIO1_IO11		0x184	/* SODIMM 16 */
 		>;
 	};
 
-    led_control: led {
+	led_control: led {
 		fsl,pins = <
 			MX8MP_IOMUXC_NAND_DQS__GPIO3_IO14		0x82	/* SODIMM 66 */
 		>;
 	};
 
-    led_wdi_control: led_wdi {
+	led_wdi_control: led_wdi {
 		fsl,pins = <
-			MX8MP_IOMUXC_NAND_DATA02__GPIO3_IO08	0x82	/* SODIMM 60 */
+			MX8MP_IOMUXC_NAND_DATA02__GPIO3_IO08		0x82	/* SODIMM 60 */
 		>;
 	};
 
-    Watchdog_control: WDI {
+	Watchdog_control: WDI {
 		fsl,pins = <
-		MX8MP_IOMUXC_NAND_ALE__GPIO3_IO00		    0x82	/* SODIMM 52 */
+			MX8MP_IOMUXC_NAND_ALE__GPIO3_IO00		0x82	/* SODIMM 52 */
 		>;
 	};
 
 	M2_PWR_EN_Control: M2_PWR_EN {
 		fsl,pins = <
-		MX8MP_IOMUXC_NAND_CE0_B__GPIO3_IO01      	0x82	/* SODIMM 54 */
+			MX8MP_IOMUXC_NAND_CE0_B__GPIO3_IO01		0x82	/* SODIMM 54 */
 		>;
 	};
 
-    pinctrl_csenable: csenable {
+	pinctrl_csenable: csenable {
 		fsl,pins = <
-			MX8MP_IOMUXC_NAND_DATA01__GPIO3_IO07 	0x184	/* SODIMM 58 */
+			MX8MP_IOMUXC_NAND_DATA01__GPIO3_IO07		0x184	/* SODIMM 58 */
 		>;
 	};
 
@@ -171,7 +170,6 @@
 		>;
 	};
 };
-
 
 &mipi_csi_0 {
 	#address-cells = <1>;
@@ -197,13 +195,13 @@
 	#size-cells = <0>;
 	status = "okay";
 
-	ov5640_0:ov5640_mipi@3c {
+	ov5640_0: ov5640_mipi@3c {
 		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
 		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
 		assigned-clock-rates = <24000000>;
 		AVDD-supply = <&csi_enable>;
-        DVDD-supply = <&csi_enable>;
-        DOVDD-supply = <&trigger_enable>;
+		DVDD-supply = <&csi_enable>;
+		DOVDD-supply = <&trigger_enable>;
 		compatible = "ovti,ov5640";
 		clock-names = "xclk";
 		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
