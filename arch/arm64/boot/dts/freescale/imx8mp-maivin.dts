@@ -59,14 +59,12 @@
 	temp_sensor: tmp102@4b {
 		compatible = "ti,tmp102", "tmp102";
 		reg = <0x4b>;
-		status = "okay";
 	};
 
 	/* To be compatible with old versions of the board */
 	temp_sensor_old: tmp102@4a {
 		compatible = "ti,tmp102", "tmp102";
 		reg = <0x4a>;
-		status = "okay";
 	};
 
 	/* EEPROM on the rear connector interface */
@@ -80,7 +78,6 @@
 		compatible = "st,24c02";
 		pagesize = <16>;
 		reg = <0x57>;
-		status = "okay";
 	};
 };
 
@@ -211,7 +208,6 @@
 		mipi_csi;
 		pinctrl-names = "default";
 		reg = <0x3c>;
-		status = "okay";
 
 		port {
 			ov5640_mipi_0_ep: endpoint {
