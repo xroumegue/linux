@@ -47,13 +47,6 @@
 	eee-broken-1000t;
 };
 
-/* On-module I2C */
-&i2c1 {
-	rear_connector_eeprom@50 {
-		status = "okay";
-	};
-};
-
 /* Verdin I2C_2_DSI */
 &i2c2 {
 	clock-frequency = <400000>;
@@ -74,6 +67,13 @@
 		compatible = "ti,tmp102", "tmp102";
 		reg = <0x4a>;
 		status = "okay";
+	};
+
+	/* EEPROM on the rear connector interface */
+	eeprom@54 {
+		compatible = "st,24c02";
+		pagesize = <16>;
+		reg = <0x54>;
 	};
 
 	cpu_eeprom@57 {
