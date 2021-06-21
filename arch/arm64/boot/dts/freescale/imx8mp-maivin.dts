@@ -47,36 +47,6 @@
 	sda-gpios = <&gpio5 17 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
 };
 
-/* Verdin I2C_4_CSI */
-&i2c3 {
-	status = "okay";
-
-	camera@3c {
-		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
-		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
-		assigned-clock-rates = <24000000>;
-		AVDD-supply = <&csi_3v3>;
-		DVDD-supply = <&csi_3v3>;
-		compatible = "ovti,ov5640";
-		clock-names = "xclk";
-		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
-		csi_id = <0>;
-		mclk = <24000000>;
-		mclk_source = <0>;
-		mipi_csi;
-		pinctrl-names = "default";
-		reg = <0x3c>;
-
-		port {
-			ov5640_mipi_0_ep: endpoint {
-				clock-lanes = <0>;
-				data-lanes = <1 2>;
-				remote-endpoint = <&mipi_csi0_ep>;
-			};
-		};
-	};
-};
-
 /* Verdin I2C_1 */
 &i2c4 {
 	/* To be compatible with old versions of the board */
@@ -182,19 +152,6 @@
 		fsl,pins = <
 			MX8MP_IOMUXC_SAI1_RXC__GPIO4_IO01		0x184	/* SODIMM 222 */
 		>;
-	};
-};
-
-&mipi_csi_0 {
-	status = "okay";
-
-	ports {
-		port@0 {
-			endpoint {
-				data-lanes = <1 2>;
-				remote-endpoint = <&ov5640_mipi_0_ep>;
-			};
-		};
 	};
 };
 
