@@ -203,6 +203,19 @@
 	status = "okay";
 };
 
+/* Verdin USB_1, USB recovery */
+&usb3_phy0 {
+	status = "okay";
+};
+
+&usb3_0 {
+	status = "okay";
+};
+
+&usb_dwc3_0 {
+	status = "okay";
+};
+
 /* Verdin USB_2, for M.2 card slot */
 &usb3_phy1 {
 	status = "okay";
