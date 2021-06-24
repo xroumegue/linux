@@ -24,6 +24,10 @@
 	};
 };
 
+&eqos {
+	status = "okay";
+};
+
 /* Disable IEEE power saving */
 &ethphy0 {
 	eee-broken-100tx;
@@ -160,4 +164,9 @@
 &uart1 {
 	fsl,uart-has-rtscts;
 	linux,rs485-enabled-at-boot-time;
+};
+
+/* Verdin UART_3, used as the Linux Console */
+&uart3 {
+	status = "okay";
 };
