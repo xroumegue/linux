@@ -14,7 +14,7 @@
 		     "toradex,verdin-imx8mp",
 		     "fsl,imx8mp";
 
-	csi_3v3: csi-3v3-regulator {
+	csi_3v3: regulator-csi-3v3 {
 		compatible = "regulator-fixed";
 		regulator-name = "CSI_3V3";
 		pinctrl-0 = <&pinctrl_csi_3v3>;
