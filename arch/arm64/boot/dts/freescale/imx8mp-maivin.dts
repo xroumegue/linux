@@ -22,6 +22,16 @@
 		enable-active-high;
 		startup-delay-us = <50000>;	/* TODO: Determine the right value */
 	};
+
+	m2_3v3: regulator-m2-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "M2_3V3";
+		regulator-max-microvolt = <3300000>;
+		regulator-min-microvolt = <3300000>;
+		pinctrl-0 = <&pinctrl_m2_3v3>;
+		gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
 };
 
 &eqos {
@@ -141,7 +151,7 @@
 		>;
 	};
 
-	M2_PWR_EN_Control: M2_PWR_EN {
+	pinctrl_m2_3v3: m2-3v3-grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_NAND_CE0_B__GPIO3_IO01		0x82	/* SODIMM 54 */
 		>;
@@ -166,6 +176,16 @@
 	};
 };
 
+/* Verdin PCIE_1, for M.2 card slot */
+&pcie {
+	status = "okay";
+	epdev_on-supply = <&m2_3v3>;
+};
+
+&pcie_phy {
+	status = "okay";
+};
+
 /* Verdin UART_1 */
 /* Enabling RS-485 operation */
 &uart1 {
@@ -173,7 +193,25 @@
 	linux,rs485-enabled-at-boot-time;
 };
 
+/* Verdin UART_2, for M.2 card slot */
+&uart2 {
+	status = "okay";
+};
+
 /* Verdin UART_3, used as the Linux Console */
 &uart3 {
+	status = "okay";
+};
+
+/* Verdin USB_2, for M.2 card slot */
+&usb3_phy1 {
+	status = "okay";
+};
+
+&usb3_1 {
+	status = "okay";
+};
+
+&usb_dwc3_1 {
 	status = "okay";
 };
