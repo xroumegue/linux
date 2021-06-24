@@ -20,7 +20,7 @@
 		pinctrl-0 = <&pinctrl_csi_3v3>;
 		gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
-		startup-delay-us = <5000>;	/* TODO: Determine the right value */
+		startup-delay-us = <50000>;	/* TODO: Determine the right value */
 	};
 };
 
