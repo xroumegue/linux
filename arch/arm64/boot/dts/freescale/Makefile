@@ -280,7 +280,9 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mp-ras314-lvds-tm070jvhg33.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mp-ras314-lvds-tm070jvhg33-imx219.dtb
 
 imx8mp-verdin-dahlia-imx296-dtbs += imx8mp-verdin-nonwifi-dahlia.dtb imx8mp-verdin-dahlia-imx296.dtbo
+imx8mp-verdin-dahlia-imx327-dtbs += imx8mp-verdin-nonwifi-dahlia.dtb imx8mp-verdin-dahlia-imx327.dtbo
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-dahlia-imx296.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-dahlia-imx327.dtb
 
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk.dtb
 imx8mq-evk-pcie1-ep-dtbs += imx8mq-evk.dtb imx-pcie1-ep.dtbo
