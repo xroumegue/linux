@@ -6,7 +6,6 @@
 /dts-v1/;
 
 #include "imx8mp-verdin.dtsi"
-#include "imx8mp-verdin-dev.dtsi"
 
 / {
 	model = "Au-Zone Maivin board";
