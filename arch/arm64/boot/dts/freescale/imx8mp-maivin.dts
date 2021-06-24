@@ -32,6 +32,14 @@
 		gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 	};
+
+	/* Carrier Board Supply 3V3_SW */
+	reg_3v3: regulator-3v3-sw {
+		compatible = "regulator-fixed";
+		regulator-max-microvolt = <3300000>;
+		regulator-min-microvolt = <3300000>;
+		regulator-name = "3V3_SW";
+	};
 };
 
 &eqos {
@@ -186,6 +194,10 @@
 	status = "okay";
 };
 
+&reg_usdhc2_vmmc {
+	vin-supply = <&reg_3v3>;
+};
+
 /* Verdin UART_1 */
 /* Enabling RS-485 operation */
 &uart1 {
@@ -226,5 +238,10 @@
 };
 
 &usb_dwc3_1 {
+	status = "okay";
+};
+
+/* Verdin SD_1, for SD card slot */
+&usdhc2 {
 	status = "okay";
 };
