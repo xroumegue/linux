@@ -215,6 +215,7 @@ imx8mp-libra-rdk-fpsc-lvds-dtbs += imx8mp-libra-rdk-fpsc.dtb imx8mp-libra-rdk-fp
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-libra-rdk-fpsc-lvds.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi0-imx296.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi0-imx327.dtbo
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-msc-sm2s-ep1.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-navqp.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-nitrogen-enc-carrier-board.dtb
