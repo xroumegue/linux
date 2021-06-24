@@ -196,6 +196,9 @@ imx8mp-tqma8mpql-mba8mpxl-lvds-g133han01-dtbs += imx8mp-tqma8mpql-mba8mpxl.dtb i
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mpxl-lvds.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mpxl-lvds-g133han01.dtb
 
+imx8mp-verdin-dahlia-imx296-dtbs += imx8mp-verdin-nonwifi-dahlia.dtb imx8mp-verdin-dahlia-imx296.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-dahlia-imx296.dtb
+
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-hummingboard-pulse.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-kontron-pitx-imx8m.dtb
