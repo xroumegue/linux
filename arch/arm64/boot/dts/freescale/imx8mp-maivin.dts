@@ -46,9 +46,16 @@
 
 /* Verdin I2C_2_DSI */
 &i2c2 {
+	status = "okay";
+
 	clock-frequency = <400000>;
 	scl-gpios = <&gpio5 16 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
 	sda-gpios = <&gpio5 17 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+};
+
+/* Verdin I2C_4_CSI */
+&i2c3 {
+	status = "okay";
 };
 
 /* Verdin I2C_1 */
