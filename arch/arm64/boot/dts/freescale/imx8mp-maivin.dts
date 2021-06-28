@@ -68,11 +68,23 @@
 	clock-frequency = <400000>;
 	scl-gpios = <&gpio5 16 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
 	sda-gpios = <&gpio5 17 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+
+	dac@d {
+		compatible = "ti,dac081c081", "ti,dac5571";
+		reg = <0x0d>;
+		vref-supply = <&csi_3v3>;
+	};
 };
 
 /* Verdin I2C_4_CSI */
 &i2c3 {
 	status = "okay";
+
+	dac@d {
+		compatible = "ti,dac081c081", "ti,dac5571";
+		reg = <0x0d>;
+		vref-supply = <&csi_3v3>;
+	};
 };
 
 /* Verdin I2C_1 */
