@@ -193,6 +193,15 @@
 			MX8MP_IOMUXC_SAI1_RXC__GPIO4_IO01		0x184	/* SODIMM 222 */
 		>;
 	};
+
+	/* Pins used to control the power to the modem */
+	m2_power_control_pins: m2_power_control {
+		fsl,pins = <
+			MX8MP_IOMUXC_NAND_CE0_B__GPIO3_IO01		0x82	/* SODIMM 54 */
+			MX8MP_IOMUXC_NAND_DATA00__GPIO3_IO06		0x82	/* SODIMM 56 */
+			MX8MP_IOMUXC_NAND_DATA03__GPIO3_IO09		0x82	/* SODIMM 62 */
+		>;
+	};
 };
 
 /* Verdin PCIE_1, for M.2 card slot */
