@@ -204,16 +204,6 @@
 	};
 };
 
-/* Verdin PCIE_1, for M.2 card slot */
-&pcie {
-	status = "okay";
-	epdev_on-supply = <&m2_3v3>;
-};
-
-&pcie_phy {
-	status = "okay";
-};
-
 &reg_usdhc2_vmmc {
 	vin-supply = <&reg_3v3>;
 };
