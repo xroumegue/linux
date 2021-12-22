@@ -1,0 +1,101 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2021 BayLibre, SAS
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/clock/imx8mp-clock.h>
+#include <dt-bindings/gpio/gpio.h>
+#include "imx8mp-pinfunc.h"
+
+/ {
+	fragment@0 {
+		target = <&iomuxc>;
+		__overlay__ {
+
+			pinctrl_i2c2: i2c2grp {
+				fsl,pins = <
+					MX8MP_IOMUXC_I2C2_SCL__I2C2_SCL		0x400001c3
+					MX8MP_IOMUXC_I2C2_SDA__I2C2_SDA		0x400001c3
+				>;
+			};
+
+			pinctrl_csi_pwdn: csipwdngrp {
+				fsl,pins = <
+					MX8MP_IOMUXC_SD1_STROBE__GPIO2_IO11	0x19
+				>;
+			};
+
+			pinctrl_csi_rst: csirstgrp {
+				fsl,pins = <
+					MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06	0x19
+				>;
+			};
+
+			pinctrl_csi_mclk: csimclkgrp {
+				fsl,pins = <
+					MX8MP_IOMUXC_GPIO1_IO15__CCM_CLKO2	0x59
+				>;
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&i2c2>;
+		__overlay__ {
+			status = "okay";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_i2c2>;
+
+			camera@3c {
+				compatible = "ovti,ov5640";
+				reg = <0x3c>;
+				pinctrl-names = "default";
+				pinctrl-0 = <&pinctrl_csi_pwdn>, <&pinctrl_csi_pwdn>,
+					    <&pinctrl_csi_mclk>;
+
+				clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
+				clock-names = "xclk";
+				assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
+				assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
+				assigned-clock-rates = <24000000>;
+				powerdown-gpios = <&gpio2 11 GPIO_ACTIVE_HIGH>;
+				reset-gpios = <&gpio1 6 GPIO_ACTIVE_LOW>;
+
+				port {
+					ov5640_out: endpoint {
+						remote-endpoint = <&mipi_csi0_ep>;
+						clock-lanes = <0>;
+						data-lanes = <1 2>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@2 {
+		target = <&isi_0>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@3 {
+		target = <&mipi_csi_0>;
+		__overlay__ {
+			status = "okay";
+
+			ports {
+				port@0 {
+					mipi_csi0_ep: endpoint {
+						remote-endpoint = <&ov5640_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2>;
+					};
+				};
+			};
+		};
+	};
+};
