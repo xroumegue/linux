@@ -98,12 +98,32 @@ struct media_graph {
 /**
  * struct media_pipeline - Media pipeline related information
  *
- * @streaming_count:	Streaming start count - streaming stop count
- * @graph:		Media graph walk during pipeline start / stop
+ * @mdev:		The media device the pipeline is part of
+ * @pads:		List of media_pipeline_pad
+ * @start_count:	Media pipeline start - stop count
  */
 struct media_pipeline {
-	int streaming_count;
-	struct media_graph graph;
+	struct media_device *mdev;
+	struct list_head pads;
+	int start_count;
+};
+
+/**
+ * struct media_pipeline_pad - A pad part of a media pipeline
+ *
+ * @list:		Entry in the media_pad pads list
+ * @pipe:		The media_pipeline that the pad is part of
+ * @pad:		The media pad
+ *
+ * This structure associate a pad with a media pipeline. Instances of
+ * media_pipeline_pad are created by media_pipeline_start() when it builds the
+ * pipeline, and stored in the &media_pad.pads list. media_pipeline_stop()
+ * removes the entries from the list and deletes them.
+ */
+struct media_pipeline_pad {
+	struct list_head list;
+	struct media_pipeline *pipe;
+	struct media_pad *pad;
 };
 
 /**
