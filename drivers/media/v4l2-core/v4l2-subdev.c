@@ -1307,13 +1307,14 @@ int v4l2_subdev_link_validate(struct media_link *link)
 }
 EXPORT_SYMBOL_GPL(v4l2_subdev_link_validate);
 
-bool v4l2_subdev_has_route(struct media_entity *entity, unsigned int pad0,
-			   unsigned int pad1)
+u64 v4l2_subdev_has_route(struct media_entity *entity, unsigned int pad0,
+			  u64 streams, unsigned int pad1)
 {
 	struct v4l2_subdev *sd = media_entity_to_v4l2_subdev(entity);
 	struct v4l2_subdev_krouting *routing;
-	unsigned int i;
 	struct v4l2_subdev_state *state;
+	u64 pad1_streams = 0;
+	unsigned int i;
 
 	state = v4l2_subdev_lock_and_get_active_state(sd);
 
@@ -1325,16 +1326,18 @@ bool v4l2_subdev_has_route(struct media_entity *entity, unsigned int pad0,
 		if (!(route->flags & V4L2_SUBDEV_ROUTE_FL_ACTIVE))
 			continue;
 
-		if ((route->sink_pad == pad0 && route->source_pad == pad1) ||
-		    (route->source_pad == pad0 && route->sink_pad == pad1)) {
-			v4l2_subdev_unlock_state(state);
-			return true;
-		}
+		if (route->sink_pad == pad0 && route->source_pad == pad1 &&
+		    (streams & BIT(route->sink_stream)))
+			pad1_streams |= BIT(route->source_stream);
+
+		if (route->source_pad == pad0 && route->sink_pad == pad1 &&
+		    (streams & BIT(route->source_stream)))
+			pad1_streams |= BIT(route->sink_stream);
 	}
 
 	v4l2_subdev_unlock_state(state);
 
-	return false;
+	return pad1_streams;
 }
 EXPORT_SYMBOL_GPL(v4l2_subdev_has_route);
 

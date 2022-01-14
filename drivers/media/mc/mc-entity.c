@@ -249,35 +249,40 @@ EXPORT_SYMBOL_GPL(media_entity_pads_init);
  *
  * @entity: The entity
  * @pad0: The first pad index
+ * @streams: Streams on the first pad
  * @pad1: The second pad index
  *
  * This function uses the &media_entity_operations.has_route() operation to
- * check connectivity inside the entity between @pad0 and @pad1.
+ * check connectivity inside the entity between @pad0 and @pad1. It returns the
+ * bitmask of streams on @pad1 that are internally connected to the given
+ * @streams on @pad0.
  *
  * One of @pad0 and @pad1 must be a sink pad and the other one a source pad.
  * The function returns 0 if both pads are sinks or sources.
  *
  * If the has_route operation is not implemented, all pads of the entity are
- * considered as connected.
+ * considered as connected, with a 1:1 mapping of the streams.
  *
  * The caller must hold entity->graph_obj.mdev->mutex.
  *
- * Return: true if the pads are connected internally and false otherwise.
+ * Return: The bitmask of streams on pad1 connected to the given streams on
+ * pad0 (0 if none of the streams are routed to pad1).
  */
-static bool media_entity_has_route(struct media_entity *entity,
-				   unsigned int pad0, unsigned int pad1)
+static u64 media_entity_has_route(struct media_entity *entity,
+				  unsigned int pad0, u64 streams,
+				  unsigned int pad1)
 {
 	if (pad0 >= entity->num_pads || pad1 >= entity->num_pads)
-		return false;
+		return 0;
 
 	if (entity->pads[pad0].flags & entity->pads[pad1].flags &
 	    (MEDIA_PAD_FL_SINK | MEDIA_PAD_FL_SOURCE))
-		return false;
+		return 0;
 
 	if (!entity->ops || !entity->ops->has_route)
-		return true;
+		return streams;
 
-	return entity->ops->has_route(entity, pad0, pad1);
+	return entity->ops->has_route(entity, pad0, streams, pad1);
 }
 
 /* push an entity to traversal stack */
@@ -388,7 +393,7 @@ static void media_graph_walk_iter(struct media_graph *graph)
 	 * internally in the entity ?
 	 */
 	if (pad != local &&
-	    !media_entity_has_route(pad->entity, pad->index, local->index)) {
+	    !media_entity_has_route(pad->entity, pad->index, 1, local->index)) {
 		link_top(graph) = link_top(graph)->next;
 		dev_dbg(pad->graph_obj.mdev->dev,
 			"walk: skipping \"%s\":%u -> %u (no route)\n",
@@ -457,10 +462,12 @@ EXPORT_SYMBOL_GPL(media_graph_walk_next);
  * struct media_pipeline_walk_entry - Entry in the pipeline traversal stack
  *
  * @pad: The media pad being visited
+ * @streams: The streams on the media pad
  * @links: Links left to be visited
  */
 struct media_pipeline_walk_entry {
 	struct media_pad *pad;
+	u64 streams;
 	struct list_head *links;
 };
 
@@ -523,7 +530,7 @@ static int media_pipeline_walk_resize(struct media_pipeline_walk *walk)
 
 /* Push a new entry on the stack. */
 static int media_pipeline_walk_push(struct media_pipeline_walk *walk,
-				    struct media_pad *pad)
+				    struct media_pad *pad, u64 streams)
 {
 	struct media_pipeline_walk_entry *entry;
 	int ret;
@@ -537,11 +544,12 @@ static int media_pipeline_walk_push(struct media_pipeline_walk *walk,
 	walk->stack.top++;
 	entry = media_pipeline_walk_top(walk);
 	entry->pad = pad;
+	entry->streams = streams;
 	entry->links = pad->entity->links.next;
 
 	dev_dbg(walk->mdev->dev,
-		"media pipeline: pushed entry %u: '%s':%u\n",
-		walk->stack.top, pad->entity->name, pad->index);
+		"media pipeline: pushed entry %u: '%s':%u/0x%llx\n",
+		walk->stack.top, pad->entity->name, pad->index, streams);
 
 	return 0;
 }
@@ -584,33 +592,60 @@ static void media_pipeline_walk_destroy(struct media_pipeline_walk *walk)
 /* Add a pad to the pipeline and push it to the stack. */
 static int media_pipeline_add_pad(struct media_pipeline *pipe,
 				  struct media_pipeline_walk *walk,
-				  struct media_pad *pad)
+				  struct media_pad *pad, u64 streams)
 {
 	struct media_pipeline_pad *ppad;
+	bool found = false;
 
 	list_for_each_entry(ppad, &pipe->pads, list) {
 		if (ppad->pad == pad) {
-			dev_dbg(pad->graph_obj.mdev->dev,
-				"media pipeline: already contains pad '%s':%u\n",
-				pad->entity->name, pad->index);
-			return 0;
+			found = true;
+			break;
 		}
 	}
 
-	ppad = kzalloc(sizeof(*ppad), GFP_KERNEL);
-	if (!ppad)
-		return -ENOMEM;
+	if (!found) {
+		/*
+		 * If the pipeline doesn't contain the pad yet, create a new
+		 * media_pipeline_pad instance and add it.
+		 */
+		ppad = kzalloc(sizeof(*ppad), GFP_KERNEL);
+		if (!ppad)
+			return -ENOMEM;
 
-	ppad->pipe = pipe;
-	ppad->pad = pad;
+		ppad->pipe = pipe;
+		ppad->pad = pad;
+		ppad->streams = streams;
 
-	list_add_tail(&ppad->list, &pipe->pads);
+		list_add_tail(&ppad->list, &pipe->pads);
 
-	dev_dbg(pad->graph_obj.mdev->dev,
-		"media pipeline: added pad '%s':%u\n",
-		pad->entity->name, pad->index);
+		dev_dbg(pad->graph_obj.mdev->dev,
+			"media pipeline: added pad '%s':%u/0x%llx\n",
+			pad->entity->name, pad->index, streams);
+	} else {
+		/*
+		 * Otherwise, add new streams, if any, to the existing the
+		 * existing instance. A new entry for the same pad will be
+		 * pushed to the stack, regardless of whether a stack entry
+		 * already exists (or has existed before, but has been popped).
+		 * There may be room for performance improvement here, but
+		 * correctness is guaranteed.
+		 */
+		if ((ppad->streams & streams) == streams) {
+			dev_dbg(pad->graph_obj.mdev->dev,
+				"media pipeline: already contains pad '%s':%u/0x%llx\n",
+				pad->entity->name, pad->index, streams);
+			return 0;
+		}
 
-	return media_pipeline_walk_push(walk, pad);
+		dev_dbg(pad->graph_obj.mdev->dev,
+			"media pipeline: adding streams 0x%llx to pad pad '%s':%u/0x%llx\n",
+			streams, pad->entity->name, pad->index, ppad->streams);
+
+		ppad->streams |= streams;
+	}
+
+	return media_pipeline_walk_push(walk, pad, streams);
 }
 
 /* Explore the next link of the entity at the top of the stack. */
@@ -622,9 +657,11 @@ static int media_pipeline_explore_next_link(struct media_pipeline *pipe,
 	struct media_link *link;
 	struct media_pad *local;
 	struct media_pad *remote;
+	u64 streams;
 	int ret;
 
 	pad = entry->pad;
+	streams = entry->streams;
 	link = list_entry(entry->links, typeof(*link), list);
 	media_pipeline_walk_pop(walk);
 
@@ -653,22 +690,25 @@ static int media_pipeline_explore_next_link(struct media_pipeline *pipe,
 	 * Skip links that originate from a different pad than the incoming pad
 	 * that is not connected internally in the entity to the incoming pad.
 	 */
-	if (pad != local &&
-	    !media_entity_has_route(pad->entity, pad->index, local->index)) {
-		dev_dbg(walk->mdev->dev,
-			"media pipeline: skipping link (no route)\n");
-		return 0;
+	if (pad != local) {
+		streams = media_entity_has_route(pad->entity, pad->index,
+						 streams, local->index);
+		if (pad != local && !streams) {
+			dev_dbg(walk->mdev->dev,
+				"media pipeline: skipping link (no route)\n");
+			return 0;
+		}
 	}
 
 	/*
 	 * Add the local and remote pads of the link to the pipeline and push
 	 * them to the stack, if they're not already present.
 	 */
-	ret = media_pipeline_add_pad(pipe, walk, local);
+	ret = media_pipeline_add_pad(pipe, walk, local, streams);
 	if (ret)
 		return ret;
 
-	ret = media_pipeline_add_pad(pipe, walk, remote);
+	ret = media_pipeline_add_pad(pipe, walk, remote, streams);
 	if (ret)
 		return ret;
 
@@ -694,14 +734,15 @@ static int media_pipeline_populate(struct media_pipeline *pipe,
 
 	/*
 	 * Populate the media pipeline by walking the media graph, starting
-	 * from @pad.
+	 * from @pad. Assume that the pad carries a single stream, numbered 0,
+	 * which is the usual case for entities that correspond to DMA engines.
 	 */
 	INIT_LIST_HEAD(&pipe->pads);
 	pipe->mdev = pad->graph_obj.mdev;
 
 	walk.mdev = pipe->mdev;
 	walk.stack.top = -1;
-	ret = media_pipeline_add_pad(pipe, &walk, pad);
+	ret = media_pipeline_add_pad(pipe, &walk, pad, BIT(0));
 	if (ret)
 		goto done;
 
@@ -722,8 +763,9 @@ static int media_pipeline_populate(struct media_pipeline *pipe,
 		"media pipeline populated, found pads:\n");
 
 	list_for_each_entry(ppad, &pipe->pads, list)
-		dev_dbg(pad->graph_obj.mdev->dev, "- '%s':%u\n",
-			ppad->pad->entity->name, ppad->pad->index);
+		dev_dbg(pad->graph_obj.mdev->dev, "- '%s':%u/0x%llx\n",
+			ppad->pad->entity->name, ppad->pad->index,
+			ppad->streams);
 
 	WARN_ON(walk.stack.top != -1);
 

@@ -1308,14 +1308,15 @@ int v4l2_subdev_link_validate(struct media_link *link);
  *
  * @entity: pointer to &struct media_entity
  * @pad0: pad number for the first pad
+ * @streams: streams bitmask on the first pad
  * @pad1: pad number for the second pad
  *
  * This function is an implementation of the media_entity_operations.has_route
  * operation for subdevs that implement the multiplexed streams API (as
  * indicated by the V4L2_SUBDEV_FL_MULTIPLEXED subdev flag).
  */
-bool v4l2_subdev_has_route(struct media_entity *entity, unsigned int pad0,
-			   unsigned int pad1);
+u64 v4l2_subdev_has_route(struct media_entity *entity, unsigned int pad0,
+			  u64 streams, unsigned int pad1);
 
 /**
  * __v4l2_subdev_state_alloc - allocate v4l2_subdev_state

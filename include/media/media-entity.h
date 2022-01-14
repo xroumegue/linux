@@ -109,21 +109,24 @@ struct media_pipeline {
 };
 
 /**
- * struct media_pipeline_pad - A pad part of a media pipeline
+ * struct media_pipeline_pad - A pad and associated streams part of a media
+ *	pipeline
  *
- * @list:		Entry in the media_pad pads list
- * @pipe:		The media_pipeline that the pad is part of
+ * @list:		Entry in the media_pipeline pads list
+ * @pipe:		The media_pipeline that the pad and streams are part of
  * @pad:		The media pad
+ * @streams:		Bitmask of streams on the pad
  *
- * This structure associate a pad with a media pipeline. Instances of
- * media_pipeline_pad are created by media_pipeline_start() when it builds the
- * pipeline, and stored in the &media_pad.pads list. media_pipeline_stop()
- * removes the entries from the list and deletes them.
+ * This structure associate a pad and streams it carries with a media pipeline.
+ * Instances of media_pipeline_pad are created by media_pipeline_start() when it
+ * builds the pipeline, and stored in the &media_pad.pads list.
+ * media_pipeline_stop() removes the entries from the list and deletes them.
  */
 struct media_pipeline_pad {
 	struct list_head list;
 	struct media_pipeline *pipe;
 	struct media_pad *pad;
+	u64 streams;
 };
 
 /**
@@ -247,12 +250,15 @@ struct media_pad {
  * @link_validate:	Return whether a link is valid from the entity point of
  *			view. The media_pipeline_start() function
  *			validates all links by calling this operation. Optional.
- * @has_route:		Return whether a route exists inside the entity between
- *			pad0 and pad1. pad0 and pad1 are guaranteed to not both
- *			be sinks or sources. Never call the .has_route()
- *			operation directly, always use media_entity_has_route().
- *			Optional: If the operation isn't implemented all pads
- *			will be considered as connected, with the same streams.
+ * @has_route:		Return whether the specified streams (expressed as a
+ *			bitmask) on pad0 are routed to pad1. The return value
+ *			is the bitmask of the corresponding streams on pad1 (0
+ *			if none of the streams are routed to pad1). pad0 and
+ *			pad1 are guaranteed to not both be sinks or sources.
+ *			Never call the .has_route() operation directly, always
+ *			use media_entity_has_route(). Optional: If the
+ *			operation isn't implemented all pads will be considered
+ *			as connected, with the same streams.
  *
  * .. note::
  *
@@ -266,8 +272,8 @@ struct media_entity_operations {
 			  const struct media_pad *local,
 			  const struct media_pad *remote, u32 flags);
 	int (*link_validate)(struct media_link *link);
-	bool (*has_route)(struct media_entity *entity, unsigned int pad0,
-			  unsigned int pad1);
+	u64 (*has_route)(struct media_entity *entity, unsigned int pad0,
+			 u64 streams, unsigned int pad1);
 };
 
 /**
