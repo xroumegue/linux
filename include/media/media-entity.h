@@ -127,6 +127,15 @@ struct media_pipeline_pad {
 };
 
 /**
+ * struct media_pipeline_pad_iter - Iterator for media_pipeline_for_each_pad
+ *
+ * @cursor: The current element
+ */
+struct media_pipeline_pad_iter {
+	struct list_head *cursor;
+};
+
+/**
  * struct media_link - A link object part of a media graph.
  *
  * @graph_obj:	Embedded structure containing the media object common data
@@ -1052,6 +1061,26 @@ void media_pipeline_stop(struct media_pad *pad);
  * .. note:: This is the non-locking version of media_pipeline_stop()
  */
 void __media_pipeline_stop(struct media_pad *pad);
+
+struct media_pad *
+__media_pipeline_pad_iter_next(struct media_pipeline *pipe,
+			       struct media_pipeline_pad_iter *iter,
+			       struct media_pad *pad);
+
+/**
+ * media_pipeline_for_each_pad - Iterate on all pads in a media pipeline
+ * @pipe: The pipeline
+ * @iter: The iterator (struct media_pipeline_pad_iter)
+ * @pad: The iterator pad
+ *
+ * Iterate on all pads in a media pipeline. This is only valid after the
+ * pipeline has been built with media_pipeline_start() and before it gets
+ * destroyed with media_pipeline_stop().
+ */
+#define media_pipeline_for_each_pad(pipe, iter, pad)			\
+	for (pad = __media_pipeline_pad_iter_next((pipe), iter, NULL);	\
+	     pad != NULL;						\
+	     pad = __media_pipeline_pad_iter_next((pipe), iter, pad))
 
 /**
  * media_devnode_create() - creates and initializes a device node interface
