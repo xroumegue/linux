@@ -208,9 +208,11 @@ struct media_pad {
  *			view. The media_pipeline_start() function
  *			validates all links by calling this operation. Optional.
  * @has_route:		Return whether a route exists inside the entity between
- *			two given pads. Pads are passed to the operation ordered
- *			by index. Optional: If the operation isn't implemented
- *			all pads will be considered as connected.
+ *			pad0 and pad1. pad0 and pad1 are guaranteed to not both
+ *			be sinks or sources. Never call the .has_route()
+ *			operation directly, always use media_entity_has_route().
+ *			Optional: If the operation isn't implemented all pads
+ *			will be considered as connected, with the same streams.
  *
  * .. note::
  *

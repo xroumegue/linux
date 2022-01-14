@@ -251,8 +251,14 @@ EXPORT_SYMBOL_GPL(media_entity_pads_init);
  * @pad0: The first pad index
  * @pad1: The second pad index
  *
- * This function can be used to check whether two pads of an entity are
- * connected internally in the entity.
+ * This function uses the &media_entity_operations.has_route() operation to
+ * check connectivity inside the entity between @pad0 and @pad1.
+ *
+ * One of @pad0 and @pad1 must be a sink pad and the other one a source pad.
+ * The function returns 0 if both pads are sinks or sources.
+ *
+ * If the has_route operation is not implemented, all pads of the entity are
+ * considered as connected.
  *
  * The caller must hold entity->graph_obj.mdev->mutex.
  *
@@ -264,14 +270,12 @@ static bool media_entity_has_route(struct media_entity *entity,
 	if (pad0 >= entity->num_pads || pad1 >= entity->num_pads)
 		return false;
 
-	if (pad0 == pad1)
-		return true;
+	if (entity->pads[pad0].flags & entity->pads[pad1].flags &
+	    (MEDIA_PAD_FL_SINK | MEDIA_PAD_FL_SOURCE))
+		return false;
 
 	if (!entity->ops || !entity->ops->has_route)
 		return true;
-
-	if (entity->pads[pad1].index < entity->pads[pad0].index)
-		swap(pad0, pad1);
 
 	return entity->ops->has_route(entity, pad0, pad1);
 }
@@ -397,7 +401,8 @@ static void media_graph_walk_iter(struct media_graph *graph)
 	 * Are the local pad and the pad we came from connected
 	 * internally in the entity ?
 	 */
-	if (!media_entity_has_route(pad->entity, pad->index, local->index)) {
+	if (pad != local &&
+	    !media_entity_has_route(pad->entity, pad->index, local->index)) {
 		link_top(graph) = link_top(graph)->next;
 		dev_dbg(pad->graph_obj.mdev->dev,
 			"walk: skipping \"%s\":%u -> %u (no route)\n",
