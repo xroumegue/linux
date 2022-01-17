@@ -1367,6 +1367,12 @@ struct media_pad *media_entity_remote_pad(const struct media_pad *pad)
 }
 EXPORT_SYMBOL_GPL(media_entity_remote_pad);
 
+struct media_pipeline *media_entity_pipeline(struct media_entity *entity)
+{
+	return entity->pads->pipe;
+}
+EXPORT_SYMBOL_GPL(media_entity_pipeline);
+
 int media_entity_get_fwnode_pad(struct media_entity *entity,
 				struct fwnode_handle *fwnode,
 				unsigned long direction_flags)

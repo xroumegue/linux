@@ -223,20 +223,26 @@ enum media_pad_signal_type {
  *
  * @graph_obj:	Embedded structure containing the media object common data
  * @entity:	Entity this pad belongs to
- * @pipe:	Pipeline this pad belongs to
  * @index:	Pad index in the entity pads array, numbered from 0 to n
  * @sig_type:	Type of the signal inside a media pad
  * @flags:	Pad flags, as defined in
  *		:ref:`include/uapi/linux/media.h <media_header>`
  *		(seek for ``MEDIA_PAD_FL_*``)
+ * @pipe:	Pipeline this pad belongs to. Use media_entity_pipeline() to
+ *		access this field.
  */
 struct media_pad {
 	struct media_gobj graph_obj;	/* must be first field in struct */
 	struct media_entity *entity;
-	struct media_pipeline *pipe;
 	u16 index;
 	enum media_pad_signal_type sig_type;
 	unsigned long flags;
+
+	/*
+	 * The fields below are private, and should only be accessed via
+	 * appropriate functions.
+	 */
+	struct media_pipeline *pipe;
 };
 
 /**
@@ -953,6 +959,24 @@ static inline bool media_entity_is_streaming(const struct media_entity *entity)
 
 	return false;
 }
+
+/**
+ * media_entity_pipeline - Get the media pipeline an entity is part of
+ * @entity: The entity
+ *
+ * This function returns the media pipeline that an entity has been associated
+ * with when constructing the pipeline with media_pipeline_start(). The pointer
+ * remains valid until media_pipeline_stop() is called.
+ *
+ * In general, entities can be part of multiple pipelines, when carrying
+ * multiple streams (either on different pads, or on the same pad using
+ * multiplexed streams). This function is ill-defined in that case. It
+ * currently returns the pipeline associated with the first pad of the entity.
+ *
+ * Return: The media_pipeline the entity is part of, or NULL if the entity is
+ * not part of any pipeline.
+ */
+struct media_pipeline *media_entity_pipeline(struct media_entity *entity);
 
 /**
  * media_entity_get_fwnode_pad - Get pad number from fwnode
