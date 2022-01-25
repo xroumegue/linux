@@ -650,11 +650,11 @@ static const struct mt9m114_reg mt9m114_init[] = {
  * Hardware Configuration
  */
 
-static int mt9m114_read(struct mt9m114 *sensor, u32 addr, u32 *value)
+static int mt9m114_read_array(struct mt9m114 *sensor, u32 addr,
+			      unsigned int len, u8 *value)
 {
 	struct i2c_client *client = sensor->client;
 	__be16 reg;
-	u8 val[4];
 	struct i2c_msg msg[] = {
 		{
 			.addr	= client->addr,
@@ -665,16 +665,13 @@ static int mt9m114_read(struct mt9m114 *sensor, u32 addr, u32 *value)
 		{
 			.addr	= client->addr,
 			.flags	= I2C_M_RD,
-			.buf	= (u8 *)&val,
+			.len	= len,
+			.buf	= (u8 *)value,
 		},
 	};
-	unsigned int len = ((addr >> MT9M114_REG_SIZE_SHIFT) & 3) + 1;
-	unsigned int i;
 	int ret;
 
 	reg = cpu_to_be16(addr & MT9M114_REG_ADDR_MASK);
-
-	msg[1].len = len;
 
 	ret = i2c_transfer(client->adapter, msg, 2);
 	if (ret < 0) {
@@ -682,6 +679,20 @@ static int mt9m114_read(struct mt9m114 *sensor, u32 addr, u32 *value)
 			addr & MT9M114_REG_ADDR_MASK, ret);
 		return ret;
 	}
+
+	return 0;
+}
+
+static int mt9m114_read(struct mt9m114 *sensor, u32 addr, u32 *value)
+{
+	unsigned int len = ((addr >> MT9M114_REG_SIZE_SHIFT) & 3) + 1;
+	unsigned int i;
+	u8 val[4];
+	int ret;
+
+	ret = mt9m114_read_array(sensor, addr, len, val);
+	if (ret < 0)
+		return ret;
 
 	*value = 0;
 	for (i = 0; i < len; ++i) {
