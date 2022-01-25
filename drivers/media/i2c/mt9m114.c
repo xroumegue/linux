@@ -82,6 +82,12 @@
 #define MT9M114_AE_TRACK_EXEC_AUTOMATIC_EXPOSURE		BIT(0)
 #define MT9M114_AE_TRACK_AE_TRACKING_DAMPENING_SPEED	MT9M114_REG_8BIT(0xa80a)
 
+/* Black Level registers */
+#define MT9M114_BLACKLEVEL_ALGO				MT9M114_REG_16BIT(0xb004)
+#define MT9M114_BLACKLEVEL_EXEC_CALC_BLACKLEVEL			BIT(2)
+#define MT9M114_BLACKLEVEL_MAX_BLACK_LEVEL		MT9M114_REG_8BIT(0xb00c)
+#define MT9M114_BLACKLEVEL_BLACK_LEVEL_DAMPENING	MT9M114_REG_8BIT(0xb00d)
+
 /* Color Correction Matrix registers */
 #define MT9M114_CCM_ALGO				MT9M114_REG_16BIT(0xb404)
 #define MT9M114_CCM_EXEC_CALC_CCM_MATRIX			BIT(4)
@@ -1637,6 +1643,12 @@ static int mt9m114_ifp_s_ctrl(struct v4l2_ctrl *ctrl)
 
 		break;
 
+	case V4L2_CID_BLC_AUTO:
+		mt9m114_write(sensor, MT9M114_BLACKLEVEL_ALGO, ctrl->val ?
+			      MT9M114_BLACKLEVEL_EXEC_CALC_BLACKLEVEL : 0,
+			      &ret);
+		break;
+
 	case V4L2_CID_TEST_PATTERN:
 	case V4L2_CID_TEST_PATTERN_RED:
 	case V4L2_CID_TEST_PATTERN_GREENR:
@@ -2193,6 +2205,8 @@ static int mt9m114_ifp_init(struct mt9m114 *sensor)
 			  V4L2_CID_PIXEL_RATE,
 			  sensor->pixrate, sensor->pixrate, 1,
 			  sensor->pixrate);
+	v4l2_ctrl_new_std(hdl, &mt9m114_ifp_ctrl_ops, V4L2_CID_BLC_AUTO,
+			  0, 1, 1, 1);
 
 	sensor->ifp.tpg[MT9M114_TPG_PATTERN] =
 		v4l2_ctrl_new_std_menu_items(hdl, &mt9m114_ifp_ctrl_ops,
