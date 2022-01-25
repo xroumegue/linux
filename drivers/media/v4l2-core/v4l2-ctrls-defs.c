@@ -1121,6 +1121,8 @@ const char *v4l2_ctrl_get_name(u32 id)
 	case V4L2_CID_TEST_PATTERN:		return "Test Pattern";
 	case V4L2_CID_DEINTERLACING_MODE:	return "Deinterlacing Mode";
 	case V4L2_CID_DIGITAL_GAIN:		return "Digital Gain";
+	case V4L2_CID_CCM_CUR:			return "CCM (Current)";
+	case V4L2_CID_CCM_CUR_LL:		return "CCM, Low Light (Current)";
 
 	/* DV controls */
 	/* Keep the order of the 'case's the same as in v4l2-controls.h! */
@@ -1470,6 +1472,8 @@ void v4l2_ctrl_fill(u32 id, const char **name, enum v4l2_ctrl_type *type,
 		*type = V4L2_CTRL_TYPE_U16;
 		break;
 	case V4L2_CID_RDS_TX_ALT_FREQS:
+	case V4L2_CID_CCM_CUR:
+	case V4L2_CID_CCM_CUR_LL:
 		*type = V4L2_CTRL_TYPE_U32;
 		break;
 	case V4L2_CID_STATELESS_MPEG2_SEQUENCE:
@@ -1610,6 +1614,10 @@ void v4l2_ctrl_fill(u32 id, const char **name, enum v4l2_ctrl_type *type,
 	case V4L2_CID_CAMERA_ORIENTATION:
 	case V4L2_CID_CAMERA_SENSOR_ROTATION:
 		*flags |= V4L2_CTRL_FLAG_READ_ONLY;
+		break;
+	case V4L2_CID_CCM_CUR:
+	case V4L2_CID_CCM_CUR_LL:
+		*flags |= V4L2_CTRL_FLAG_READ_ONLY | V4L2_CTRL_FLAG_VOLATILE;
 		break;
 	case V4L2_CID_RF_TUNER_PLL_LOCK:
 		*flags |= V4L2_CTRL_FLAG_VOLATILE;
