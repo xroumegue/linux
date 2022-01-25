@@ -1123,6 +1123,7 @@ const char *v4l2_ctrl_get_name(u32 id)
 	case V4L2_CID_DIGITAL_GAIN:		return "Digital Gain";
 	case V4L2_CID_CCM_CUR:			return "CCM (Current)";
 	case V4L2_CID_CCM_CUR_LL:		return "CCM, Low Light (Current)";
+	case V4L2_CID_BLC_AUTO:			return "Black Level Compensation, Auto";
 
 	/* DV controls */
 	/* Keep the order of the 'case's the same as in v4l2-controls.h! */
@@ -1248,6 +1249,7 @@ void v4l2_ctrl_fill(u32 id, const char **name, enum v4l2_ctrl_type *type,
 	case V4L2_CID_MPEG_VIDEO_AU_DELIMITER:
 	case V4L2_CID_WIDE_DYNAMIC_RANGE:
 	case V4L2_CID_IMAGE_STABILIZATION:
+	case V4L2_CID_BLC_AUTO:
 	case V4L2_CID_RDS_RECEPTION:
 	case V4L2_CID_RF_TUNER_LNA_GAIN_AUTO:
 	case V4L2_CID_RF_TUNER_MIXER_GAIN_AUTO:

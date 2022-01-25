@@ -66,3 +66,6 @@ Image Process Control IDs
     for low-light conditions. The values are expressed as S15.16 fixed-point
     integers and stored in a 3x3 array of U32 integers, in RGB order. This
     control is read-only and volatile.
+
+``V4L2_CID_BLC_AUTO (boolean)``
+    Enable or disable automatic black level compensation.
