@@ -85,6 +85,8 @@
 /* Color Correction Matrix registers */
 #define MT9M114_CCM_ALGO				MT9M114_REG_16BIT(0xb404)
 #define MT9M114_CCM_EXEC_CALC_CCM_MATRIX			BIT(4)
+#define MT9M114_CCM(n)					MT9M114_REG_16BIT(0xb406 + (n) * 2)
+#define MT9M114_CCM_LL_DELTA_CCM(n)			MT9M114_REG_16BIT(0xb418 + (n) * 2)
 #define MT9M114_CCM_DELTA_GAIN				MT9M114_REG_8BIT(0xb42a)
 
 /* Camera Control registers */
@@ -1543,6 +1545,52 @@ static inline struct mt9m114 *ifp_ctrl_to_mt9m114(struct v4l2_ctrl *ctrl)
 	return container_of(ctrl->handler, struct mt9m114, ifp.hdl);
 }
 
+static int mt9m114_ifp_g_ccm(struct mt9m114 *sensor, u32 addr, u32 *ccm)
+{
+	__be16 values[9];
+	unsigned int i;
+	int ret;
+
+	ret = mt9m114_read_array(sensor, addr, sizeof(values), (u8 *)values);
+	if (ret < 0)
+		return ret;
+
+	for (i = 0; i < ARRAY_SIZE(values); ++i)
+		ccm[i] = ((u32)(s16)be16_to_cpu(values[i])) << 8;
+
+	return 0;
+}
+
+static int mt9m114_ifp_g_ctrl(struct v4l2_ctrl *ctrl)
+{
+	struct mt9m114 *sensor = ifp_ctrl_to_mt9m114(ctrl);
+	int ret;
+
+	if (!pm_runtime_get_if_in_use(&sensor->client->dev))
+		return 0;
+
+	switch (ctrl->id) {
+	case V4L2_CID_CCM_CUR:
+		ret = mt9m114_ifp_g_ccm(sensor, MT9M114_CCM(0),
+					ctrl->p_new.p_u32);
+		break;
+
+	case V4L2_CID_CCM_CUR_LL:
+		ret = mt9m114_ifp_g_ccm(sensor, MT9M114_CCM_LL_DELTA_CCM(0),
+					ctrl->p_new.p_u32);
+		break;
+
+	default:
+		ret = -EINVAL;
+		break;
+	}
+
+	pm_runtime_mark_last_busy(&sensor->client->dev);
+	pm_runtime_put_autosuspend(&sensor->client->dev);
+
+	return ret;
+}
+
 static int mt9m114_ifp_s_ctrl(struct v4l2_ctrl *ctrl)
 {
 	struct mt9m114 *sensor = ifp_ctrl_to_mt9m114(ctrl);
@@ -1645,7 +1693,26 @@ static int mt9m114_ifp_s_ctrl(struct v4l2_ctrl *ctrl)
 }
 
 static const struct v4l2_ctrl_ops mt9m114_ifp_ctrl_ops = {
+	.g_volatile_ctrl = mt9m114_ifp_g_ctrl,
 	.s_ctrl = mt9m114_ifp_s_ctrl,
+};
+
+static const struct v4l2_ctrl_config mt9m114_ifp_ctrls[] = {
+	{
+		.ops		= &mt9m114_ifp_ctrl_ops,
+		.id		= V4L2_CID_CCM_CUR,
+		.min		= -32768 << 8,
+		.max		= 32767 << 8,
+		.step		= 1 << 8,
+		.dims		= { 3, 3 },
+	}, {
+		.ops		= &mt9m114_ifp_ctrl_ops,
+		.id		= V4L2_CID_CCM_CUR_LL,
+		.min		= -32768 << 8,
+		.max		= 32767 << 8,
+		.step		= 1 << 8,
+		.dims		= { 3, 3 },
+	}
 };
 
 /* -----------------------------------------------------------------------------
@@ -2092,6 +2159,7 @@ static int mt9m114_ifp_init(struct mt9m114 *sensor)
 	struct v4l2_subdev *sd = &sensor->ifp.sd;
 	struct media_pad *pads = sensor->ifp.pads;
 	struct v4l2_ctrl_handler *hdl = &sensor->ifp.hdl;
+	unsigned int i;
 	int ret;
 
 	/* Initialize the subdev. */
@@ -2113,7 +2181,7 @@ static int mt9m114_ifp_init(struct mt9m114 *sensor)
 	sensor->ifp.frame_rate = MT9M114_DEF_FRAME_RATE;
 
 	/* Initialize the control handler. */
-	v4l2_ctrl_handler_init(hdl, 8);
+	v4l2_ctrl_handler_init(hdl, 8 + ARRAY_SIZE(mt9m114_ifp_ctrls));
 	v4l2_ctrl_new_std(hdl, &mt9m114_ifp_ctrl_ops,
 			  V4L2_CID_AUTO_WHITE_BALANCE,
 			  0, 1, 1, 1);
@@ -2145,6 +2213,9 @@ static int mt9m114_ifp_init(struct mt9m114 *sensor)
 				  0, 1023, 1, 1023);
 
 	v4l2_ctrl_cluster(ARRAY_SIZE(sensor->ifp.tpg), sensor->ifp.tpg);
+
+	for (i = 0; i < ARRAY_SIZE(mt9m114_ifp_ctrls); ++i)
+		v4l2_ctrl_new_custom(hdl, &mt9m114_ifp_ctrls[i], NULL);
 
 	if (hdl->error) {
 		ret = hdl->error;
