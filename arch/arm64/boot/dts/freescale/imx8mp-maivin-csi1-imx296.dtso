@@ -16,7 +16,7 @@
 	};
 
 	camera@1a {
-		compatible = "sony,imx296ll";
+		compatible = "sony,imx296lq";
 		reg = <0x1a>;
 
 		clocks = <&vc_ctrl>;
