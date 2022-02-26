@@ -6,6 +6,8 @@
 /dts-v1/;
 /plugin/;
 
+#include <dt-bindings/media/video-interfaces.h>
+
 / {
 	fragment@0 {
 		target = <&isp_0>;
@@ -15,6 +17,7 @@
 			ports {
 				port@1 {
 					isp0_in: endpoint {
+						bus-type = <MEDIA_BUS_TYPE_PARALLEL>;
 						remote-endpoint = <&mipi_csi_0_out>;
 					};
 				};
