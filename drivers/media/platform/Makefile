@@ -22,6 +22,7 @@ obj-$(CONFIG_VIDEO_CODA)		+= coda/
 
 obj-$(CONFIG_VIDEO_IMX_PXP)		+= imx-pxp.o
 obj-$(CONFIG_VIDEO_IMX8_JPEG)		+= imx-jpeg/
+obj-y += nxp/dw100/
 
 obj-$(CONFIG_VIDEO_MEM2MEM_DEINTERLACE)	+= m2m-deinterlace.o
 
