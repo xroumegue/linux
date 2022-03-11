@@ -37,9 +37,9 @@ config VIDEO_IMX_CAPTURE
 	tristate "i.MX V4L2 media core driver"
 	depends on ARCH_MXC || COMPILE_TEST
 	depends on MEDIA_CONTROLLER && VIDEO_V4L2
-	depends on VIDEO_V4L2_SUBDEV_API
 	depends on HAS_DMA
 	select VIDEOBUF2_DMA_CONTIG
+	select VIDEO_V4L2_SUBDEV_API
 	select V4L2_FWNODE
 	help
 	  Say yes here to enable support for video4linux media controller
@@ -50,7 +50,8 @@ menu "i.MX8QXP/QM Camera ISI/MIPI Features support"
 
 config IMX8_MIPI_CSI2
 	tristate "IMX8 MIPI CSI2 Controller"
-	depends on VIDEO_V4L2 && VIDEO_V4L2_SUBDEV_API
+	depends on VIDEO_V4L2
+	select VIDEO_V4L2_SUBDEV_API
 	default y
 	help
 	  Enable support for video4linux camera sensor interface driver for
@@ -58,7 +59,8 @@ config IMX8_MIPI_CSI2
 
 config IMX8_MIPI_CSI2_SAM
 	tristate "IMX8 MIPI CSI2 SAMSUNG Controller"
-	depends on VIDEO_V4L2 && VIDEO_V4L2_SUBDEV_API
+	depends on VIDEO_V4L2
+	select VIDEO_V4L2_SUBDEV_API
 	default y
 	help
 	  Enable support for video4linux MIPI CSI2 Samsung driver for
@@ -66,7 +68,8 @@ config IMX8_MIPI_CSI2_SAM
 
 config IMX8_ISI_HW
 	tristate "IMX8 Image Sensor Interface hardware driver"
-	depends on VIDEO_V4L2 && VIDEO_V4L2_SUBDEV_API
+	depends on VIDEO_V4L2
+	select VIDEO_V4L2_SUBDEV_API
 	default y
 	help
 	  ISI hardware driver is used to export functions to config
@@ -80,9 +83,10 @@ config IMX8_ISI_CORE
 
 config IMX8_ISI_CAPTURE
 	tristate "IMX8 Image Sensor Interface Capture Device Driver"
-	depends on VIDEO_V4L2 && VIDEO_V4L2_SUBDEV_API
+	depends on VIDEO_V4L2
 	depends on IMX8_ISI_HW
 	select VIDEOBUF2_DMA_CONTIG
+	select VIDEO_V4L2_SUBDEV_API
 	default y
 
 config IMX8_ISI_M2M
@@ -93,7 +97,8 @@ config IMX8_ISI_M2M
 
 config GMSL_MAX9286
 	tristate "GMSL MAX8286"
-	depends on VIDEO_V4L2 && VIDEO_V4L2_SUBDEV_API
+	depends on VIDEO_V4L2
+	select VIDEO_V4L2_SUBDEV_API
 	default y
 	help
 	  Enable support for video4linux camera sensor driver for GMSL MAX9286
@@ -108,7 +113,8 @@ config IMX8_MEDIA_DEVICE
 
 config IMX8_PARALLEL_CSI
 	tristate "IMX8 Parallel Capture Controller"
-	depends on VIDEO_V4L2 && VIDEO_V4L2_SUBDEV_API
+	depends on VIDEO_V4L2
+	select VIDEO_V4L2_SUBDEV_API
 	default y
 	help
 	  Enable support for video4linux parallel camera sensor interface
