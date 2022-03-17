@@ -1088,10 +1088,10 @@ static int v4l2_link_validate_get_streams(struct media_link *link,
 {
 	static const u32 default_streams[] = { 0 };
 	struct v4l2_subdev_krouting *routing;
+	struct v4l2_subdev_route *route;
 	struct v4l2_subdev *subdev;
 	u32 num_streams;
 	u32 *streams;
-	unsigned int i;
 	struct v4l2_subdev_state *state;
 	int ret;
 
@@ -1117,15 +1117,11 @@ static int v4l2_link_validate_get_streams(struct media_link *link,
 
 	num_streams = 0;
 
-	for (i = 0; i < routing->num_routes; ++i) {
-		struct v4l2_subdev_route *route = &routing->routes[i];
+	for_each_active_route(routing, route) {
 		int j;
 		u32 route_pad;
 		u32 route_stream;
 		u32 link_pad;
-
-		if (!(route->flags & V4L2_SUBDEV_ROUTE_FL_ACTIVE))
-			continue;
 
 		if (is_source) {
 			route_pad = route->source_pad;
