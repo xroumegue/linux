@@ -251,6 +251,13 @@ enum v4l2_colorspace {
 
 	/* SMPTE ST 428-1 */
 	V4L2_COLORSPACE_ST428         = 14,
+#ifdef __KERNEL__
+	/*
+	 * Largest supported colorspace value, assigned by the compiler, used
+	 * by the framework to check for invalid values.
+	 */
+	V4L2_COLORSPACE_LAST,
+#endif
 };
 
 /*
@@ -310,6 +317,13 @@ enum v4l2_xfer_func {
 	V4L2_XFER_FUNC_XVYCC       = 12,
 	V4L2_XFER_FUNC_BT1361      = 13,
 	V4L2_XFER_FUNC_ST428       = 14,
+#ifdef __KERNEL__
+	/*
+	 * Largest supported transfer function value, assigned by the compiler,
+	 * used by the framework to check for invalid values.
+	 */
+	V4L2_XFER_FUNC_LAST,
+#endif
 };
 
 /*
@@ -373,6 +387,13 @@ enum v4l2_ycbcr_encoding {
 
 	/* KR=0.30, KB=0.11 or equivalent */
 	V4L2_YCBCR_ENC_BT470_6M       = 9,
+#ifdef __KERNEL__
+	/*
+	 * Largest supported encoding value, assigned by the compiler, used by
+	 * the framework to check for invalid values.
+	 */
+	V4L2_YCBCR_ENC_LAST,
+#endif
 };
 
 /*
@@ -408,6 +429,13 @@ enum v4l2_quantization {
 	V4L2_QUANTIZATION_DEFAULT     = 0,
 	V4L2_QUANTIZATION_FULL_RANGE  = 1,
 	V4L2_QUANTIZATION_LIM_RANGE   = 2,
+#ifdef __KERNEL__
+	/*
+	 * Largest supported quantization value, assigned by the compiler, used
+	 * by the framework to check for invalid values.
+	 */
+	V4L2_QUANTIZATION_LAST,
+#endif
 };
 
 /*
