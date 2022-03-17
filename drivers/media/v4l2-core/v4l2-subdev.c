@@ -919,8 +919,8 @@ static int
 v4l2_subdev_init_stream_configs(struct v4l2_subdev_stream_configs *stream_configs,
 				const struct v4l2_subdev_krouting *routing)
 {
+	struct v4l2_subdev_route *route;
 	u32 num_configs = 0;
-	unsigned int i;
 	u32 format_idx = 0;
 
 	kvfree(stream_configs->configs);
@@ -928,12 +928,7 @@ v4l2_subdev_init_stream_configs(struct v4l2_subdev_stream_configs *stream_config
 	stream_configs->num_configs = 0;
 
 	/* Count number of formats needed */
-	for (i = 0; i < routing->num_routes; ++i) {
-		struct v4l2_subdev_route *route = &routing->routes[i];
-
-		if (!(route->flags & V4L2_SUBDEV_ROUTE_FL_ACTIVE))
-			continue;
-
+	for_each_active_route(routing, route) {
 		/*
 		 * Each route needs a format on both ends of the route, except
 		 * for source streams which only need one format.
@@ -957,12 +952,8 @@ v4l2_subdev_init_stream_configs(struct v4l2_subdev_stream_configs *stream_config
 	 * Fill in the 'pad' and stream' value for each item in the array from
 	 * the routing table
 	 */
-	for (i = 0; i < routing->num_routes; ++i) {
-		struct v4l2_subdev_route *route = &routing->routes[i];
+	for_each_active_route(routing, route) {
 		u32 idx;
-
-		if (!(route->flags & V4L2_SUBDEV_ROUTE_FL_ACTIVE))
-			continue;
 
 		if (!(route->flags & V4L2_SUBDEV_ROUTE_FL_SOURCE)) {
 			idx = format_idx++;
