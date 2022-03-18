@@ -1565,11 +1565,9 @@ int v4l2_subdev_routing_find_opposite_end(const struct v4l2_subdev_krouting *rou
 					  u32 pad, u32 stream, u32 *other_pad,
 					  u32 *other_stream)
 {
-	unsigned int i;
+	struct v4l2_subdev_route *route;
 
-	for (i = 0; i < routing->num_routes; ++i) {
-		struct v4l2_subdev_route *route = &routing->routes[i];
-
+	for_each_active_route(routing, route) {
 		if (route->source_pad == pad &&
 		    route->source_stream == stream) {
 			if (other_pad)
