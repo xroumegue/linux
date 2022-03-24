@@ -45,12 +45,6 @@
 	status = "okay";
 };
 
-/* Disable IEEE power saving */
-&ethphy0 {
-	eee-broken-100tx;
-	eee-broken-1000t;
-};
-
 /* Verdin CAN_1 */
 &flexcan1 {
 	status = "okay";
