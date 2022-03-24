@@ -85,12 +85,6 @@
 &i2c4 {
 	status = "okay";
 
-	/* To be compatible with old versions of the board */
-	temp-sensor@4a {
-		compatible = "ti,tmp102","tmp102";
-		reg = <0x4a>;
-	};
-
 	temp-sensor@4b {
 		compatible = "ti,tmp102", "tmp102";
 		reg = <0x4b>;
