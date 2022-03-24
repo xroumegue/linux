@@ -106,8 +106,8 @@
 &iomuxc {
 	pinctrl-0 = <&pinctrl_gpio1>, <&pinctrl_gpio2>,
 		    <&pinctrl_gpio3>, <&pinctrl_gpio4>,
-		    <&pinctrl_gpio_hog1>, <&pinctrl_gpio_hog2>, <&pinctrl_gpio_hog3>,
-		    <&pinctrl_hdmi_hog>, <&pinctrl_pmic_tpm_ena>;
+		    <&pinctrl_gpio_hog1>, <&pinctrl_gpio_hog2>,
+		    <&pinctrl_gpio_hog3>, <&pinctrl_hdmi_hog>;
 
 	pinctrl_flexspi0: flexspi0grp {
 		fsl,pins = <
