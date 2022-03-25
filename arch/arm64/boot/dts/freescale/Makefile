@@ -88,6 +88,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-isp1.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-isp2.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ov5640-csi1.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb-tevi_ov5640-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore-mx8mp-edimm2.2.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-phyboard-pollux-rdk.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mpxl.dtb
