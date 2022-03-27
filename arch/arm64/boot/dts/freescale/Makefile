@@ -12,6 +12,7 @@ DTC_FLAGS_fsl-ls1028a-qds-9999 := -@
 dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1012a-2g5rdb.dtb
 
 DTC_FLAGS_imx8mp-edm-g-wb := -@
+DTC_FLAGS_imx8mp-evk := -@
 
 dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1012a-frdm.dtb
 dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1012a-frwy.dtb
@@ -127,7 +128,11 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-dcss-rm67191.dtb imx8mq-evk-dcss-adv7535.dt
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-dcss-rm67199.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-dual-display.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb.dtb \
-			  imx8mp-edm-g-wb-tevi-ov5640-overlay.dtb
+			  imx8mp-dwe-overlay.dtb \
+			  imx8mp-isi-overlay.dtb \
+			  imx8mp-isp0-overlay.dtb \
+			  imx8mp-isp1-overlay.dtb \
+			  imx8mp-edm-g-wb-tevi_ov5640-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-hummingboard-pulse.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-kontron-pitx-imx8m.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-librem5-devkit.dtb
