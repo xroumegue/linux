@@ -1,0 +1,74 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 Ideas on Board Oy
+ *
+ * Overlay for Raspberry Pi IMX219 camera module connected to the Rock Pi 4
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/rockchip.h>
+
+&{/} {
+	clk_imx219: clock-imx219 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <24000000>;
+		clock-output-names = "clock-imx219";
+	};
+
+	vcc_imx219: vcc-imx219 {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc-imx219";
+
+		gpio = <&gpio1 RK_PB5 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		vin-supply = <&vcc_cam>;
+	};
+};
+
+&i2c4 {
+	imx219: camera@10 {
+		compatible = "sony,imx219";
+		reg = <0x10>;
+
+		clocks = <&clk_imx219>;
+
+		VANA-supply = <&vcc_imx219>;
+		VDIG-supply = <&vcc_imx219>;
+		VDDL-supply = <&vcc_imx219>;
+
+		port {
+			imx219_out: endpoint {
+				remote-endpoint = <&isp_in>;
+				data-lanes = <1 2>;
+				clock-noncontinuous;
+				link-frequencies = /bits/ 64 <456000000>;
+			};
+		};
+	};
+};
+
+&mipi_dphy_rx0 {
+	status = "okay";
+};
+
+&isp0 {
+	status = "okay";
+
+	ports {
+		port@0 {
+			isp_in: endpoint {
+				remote-endpoint = <&imx219_out>;
+				data-lanes = <1 2>;
+				clock-noncontinuous;
+			};
+		};
+	};
+};
+
+&isp0_mmu {
+	status = "okay";
+};
