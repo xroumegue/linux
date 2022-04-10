@@ -506,7 +506,6 @@
 
 &iomuxc {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_hog>;
 
 	pinctrl_hog: hoggrp {
 		fsl,pins = <
