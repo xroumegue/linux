@@ -967,8 +967,8 @@ static void mxc_isi_video_ctrls_delete(struct mxc_isi_video *video)
 static int mxc_isi_video_querycap(struct file *file, void *priv,
 				  struct v4l2_capability *cap)
 {
-	strlcpy(cap->driver, MXC_ISI_DRIVER_NAME, sizeof(cap->driver));
-	strlcpy(cap->card, MXC_ISI_CAPTURE, sizeof(cap->card));
+	strscpy(cap->driver, MXC_ISI_DRIVER_NAME, sizeof(cap->driver));
+	strscpy(cap->card, MXC_ISI_CAPTURE, sizeof(cap->card));
 
 	return 0;
 }
