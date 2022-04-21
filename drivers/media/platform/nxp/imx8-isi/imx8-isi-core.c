@@ -123,7 +123,7 @@ static int mxc_isi_v4l2_init(struct mxc_isi_dev *isi)
 	int ret;
 
 	/* Initialize the media device. */
-	strlcpy(media_dev->model, "FSL Capture Media Device",
+	strscpy(media_dev->model, "FSL Capture Media Device",
 		sizeof(media_dev->model));
 	media_dev->dev = isi->dev;
 
@@ -131,7 +131,7 @@ static int mxc_isi_v4l2_init(struct mxc_isi_dev *isi)
 
 	/* Initialize and register the V4L2 device. */
 	v4l2_dev->mdev = media_dev;
-	strlcpy(v4l2_dev->name, "mx8-img-md", sizeof(v4l2_dev->name));
+	strscpy(v4l2_dev->name, "mx8-img-md", sizeof(v4l2_dev->name));
 
 	ret = v4l2_device_register(isi->dev, v4l2_dev);
 	if (ret < 0) {

@@ -463,7 +463,7 @@ int mxc_isi_crossbar_init(struct mxc_isi_dev *isi)
 
 	v4l2_subdev_init(sd, &mxc_isi_crossbar_subdev_ops);
 	sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE | V4L2_SUBDEV_FL_MULTIPLEXED;
-	strlcpy(sd->name, "crossbar", sizeof(sd->name));
+	strscpy(sd->name, "crossbar", sizeof(sd->name));
 	sd->dev = isi->dev;
 
 	sd->entity.function = MEDIA_ENT_F_VID_MUX;
