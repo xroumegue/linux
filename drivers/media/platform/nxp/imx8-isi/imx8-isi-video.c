@@ -467,7 +467,7 @@ static void mxc_isi_video_frame_write_done(struct mxc_isi_pipe *pipe,
 	 *        ...         |           |
 	 *
 	 * Races between address programming and buffer switching can be
-	 * detected by checking if a frame end interrupt occured after
+	 * detected by checking if a frame end interrupt occurred after
 	 * programming the addresses.
 	 *
 	 * As none of the shadow registers are accessible, races can occur
@@ -506,7 +506,7 @@ static void mxc_isi_video_frame_write_done(struct mxc_isi_pipe *pipe,
 	 *
 	 * For instance, if IRQ1 is lost and we handle IRQ2, both B1 and B2
 	 * have been completed, but B3 hasn't been programmed, BUF2 still
-	 * addresses B1 and the ISI is now writting in B1 instead of B3. We
+	 * addresses B1 and the ISI is now writing in B1 instead of B3. We
 	 * can't complete B2 as that would result in out-of-order completion.
 	 *
 	 * The only option is to ignore this interrupt and try again. When IRQ3
