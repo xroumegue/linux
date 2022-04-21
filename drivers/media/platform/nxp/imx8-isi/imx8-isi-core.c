@@ -81,7 +81,7 @@ static int mxc_isi_async_notifier_complete(struct v4l2_async_notifier *notifier)
 	struct mxc_isi_dev *isi = notifier_to_mxc_isi_dev(notifier);
 	int ret;
 
-	dev_dbg(isi->dev, "%s\n", __func__);
+	dev_dbg(isi->dev, "All subdevs bound\n");
 
 	ret = v4l2_device_register_subdev_nodes(&isi->v4l2_dev);
 	if (ret < 0) {
