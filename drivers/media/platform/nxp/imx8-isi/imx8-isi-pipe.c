@@ -707,7 +707,7 @@ static irqreturn_t mxc_isi_pipe_irq_handler(int irq, void *priv)
 	status = mxc_isi_channel_irq_status(pipe, true);
 
 	if (status & CHNL_STS_FRM_STRD) {
-		if (!WARN_ON(!pipe->irq_handler))	
+		if (!WARN_ON(!pipe->irq_handler))
 			pipe->irq_handler(pipe, status);
 	}
 
