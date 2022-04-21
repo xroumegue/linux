@@ -529,7 +529,7 @@ static void mxc_isi_video_frame_write_done(struct mxc_isi_pipe *pipe,
 					    struct mxc_isi_buffer, list);
 	if (!next_buf) {
 		next_buf = list_first_entry_or_null(&video->out_discard,
-					 	    struct mxc_isi_buffer, list);
+						    struct mxc_isi_buffer, list);
 
 		/* Safety check, this should never happen. */
 		if (!next_buf) {
