@@ -258,7 +258,7 @@ static int mxc_isi_crossbar_enum_mbus_code(struct v4l2_subdev *sd,
 		if (!format)
 			return -EINVAL;
 
-		code->code = format->code;;
+		code->code = format->code;
 
 		return 0;
 	}
