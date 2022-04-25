@@ -251,7 +251,7 @@ int mxc_isi_pipe_enable(struct mxc_isi_pipe *pipe)
 	 * Find the connected input by inspecting the crossbar switch routing
 	 * table.
 	 */
-	state = v4l2_subdev_lock_active_state(&xbar->sd);
+	state = v4l2_subdev_lock_and_get_active_state(&xbar->sd);
 	ret = v4l2_subdev_routing_find_opposite_end(&state->routing,
 						    xbar->num_sinks + pipe->id,
 						    0, &input, NULL);
@@ -261,7 +261,7 @@ int mxc_isi_pipe_enable(struct mxc_isi_pipe *pipe)
 		return -EPIPE;
 
 	/* Configure the pipeline. */
-	state = v4l2_subdev_lock_active_state(sd);
+	state = v4l2_subdev_lock_and_get_active_state(sd);
 
 	sink_fmt = v4l2_subdev_get_try_format(sd, state, MXC_ISI_PIPE_PAD_SINK);
 	src_fmt = v4l2_subdev_get_try_format(sd, state, MXC_ISI_PIPE_PAD_SOURCE);
@@ -832,7 +832,7 @@ int mxc_isi_pipe_acquire(struct mxc_isi_pipe *pipe,
 	bool bypass;
 	int ret;
 
-	state = v4l2_subdev_lock_active_state(sd);
+	state = v4l2_subdev_lock_and_get_active_state(sd);
 	sink_fmt = v4l2_subdev_get_try_format(sd, state, MXC_ISI_PIPE_PAD_SINK);
 	src_fmt = v4l2_subdev_get_try_format(sd, state, MXC_ISI_PIPE_PAD_SOURCE);
 	v4l2_subdev_unlock_state(state);
