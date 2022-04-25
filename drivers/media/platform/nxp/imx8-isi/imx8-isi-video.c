@@ -641,7 +641,7 @@ static int mxc_isi_video_validate_format(struct mxc_isi_video *video)
 	struct v4l2_subdev *sd = &video->pipe->sd;
 	int ret = 0;
 
-	state = v4l2_subdev_lock_active_state(sd);
+	state = v4l2_subdev_lock_and_get_active_state(sd);
 
 	info = mxc_isi_format_by_fourcc(video->pix.pixelformat,
 					MXC_ISI_VIDEO_CAP);
