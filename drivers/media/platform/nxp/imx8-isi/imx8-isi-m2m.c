@@ -209,10 +209,9 @@ static int mxc_isi_m2m_vb2_buffer_init(struct vb2_buffer *vb2)
 	struct mxc_isi_m2m_ctx *ctx = vb2_get_drv_priv(vb2->vb2_queue);
 	const struct mxc_isi_m2m_ctx_queue_data *qdata =
 		mxc_isi_m2m_ctx_qdata(ctx, vq->type);
-	unsigned int i;
 
-	for (i = 0; i < qdata->info->memplanes; ++i)
-		buf->dma_addrs[i] = vb2_dma_contig_plane_dma_addr(vb2, i);
+	mxc_isi_video_buffer_init(vb2, buf->dma_addrs, qdata->info,
+				  &qdata->format);
 
 	return 0;
 }
@@ -221,25 +220,11 @@ static int mxc_isi_m2m_vb2_buffer_prepare(struct vb2_buffer *vb2)
 {
 	struct vb2_queue *vq = vb2->vb2_queue;
 	struct mxc_isi_m2m_ctx *ctx = vb2_get_drv_priv(vq);
-	struct mxc_isi_m2m *m2m = ctx->m2m;
 	const struct mxc_isi_m2m_ctx_queue_data *qdata =
 		mxc_isi_m2m_ctx_qdata(ctx, vq->type);
-	unsigned int i;
 
-	for (i = 0; i < qdata->info->memplanes; ++i) {
-		unsigned long size = qdata->format.plane_fmt[i].sizeimage;
-
-		if (vb2_plane_size(vb2, i) < size) {
-			dev_err(m2m->isi->dev,
-				 "User buffer too small (%ld < %ld)\n",
-				 vb2_plane_size(vb2, i), size);
-			return -EINVAL;
-		}
-
-		vb2_set_plane_payload(vb2, i, size);
-	}
-
-	return 0;
+	return mxc_isi_video_buffer_prepare(ctx->m2m->isi, vb2, qdata->info,
+					    &qdata->format);
 }
 
 static void mxc_isi_m2m_vb2_buffer_queue(struct vb2_buffer *vb2)
