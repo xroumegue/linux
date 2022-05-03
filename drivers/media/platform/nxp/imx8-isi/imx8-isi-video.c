@@ -765,6 +765,37 @@ int mxc_isi_video_queue_setup(const struct v4l2_pix_format_mplane *format,
 	return 0;
 }
 
+void mxc_isi_video_buffer_init(struct vb2_buffer *vb2, dma_addr_t dma_addrs[3],
+			       const struct mxc_isi_format_info *info,
+			       const struct v4l2_pix_format_mplane *pix)
+{
+	unsigned int i;
+
+	for (i = 0; i < info->memplanes; ++i)
+		dma_addrs[i] = vb2_dma_contig_plane_dma_addr(vb2, i);
+}
+
+int mxc_isi_video_buffer_prepare(struct mxc_isi_dev *isi, struct vb2_buffer *vb2,
+				 const struct mxc_isi_format_info *info,
+				 const struct v4l2_pix_format_mplane *pix)
+{
+	unsigned int i;
+
+	for (i = 0; i < info->memplanes; i++) {
+		unsigned long size = pix->plane_fmt[i].sizeimage;
+
+		if (vb2_plane_size(vb2, i) < size) {
+			dev_err(isi->dev, "User buffer too small (%ld < %ld)\n",
+				vb2_plane_size(vb2, i), size);
+			return -EINVAL;
+		}
+
+		vb2_set_plane_payload(vb2, i, size);
+	}
+
+	return 0;
+}
+
 static int mxc_isi_vb2_queue_setup(struct vb2_queue *q,
 				   unsigned int *num_buffers,
 				   unsigned int *num_planes,
@@ -781,11 +812,9 @@ static int mxc_isi_vb2_buffer_init(struct vb2_buffer *vb2)
 {
 	struct mxc_isi_buffer *buf = to_isi_buffer(to_vb2_v4l2_buffer(vb2));
 	struct mxc_isi_video *video = vb2_get_drv_priv(vb2->vb2_queue);
-	const struct mxc_isi_format_info *fmt = video->fmtinfo;
-	unsigned int i;
 
-	for (i = 0; i < fmt->memplanes; ++i)
-		buf->dma_addrs[i] = vb2_dma_contig_plane_dma_addr(vb2, i);
+	mxc_isi_video_buffer_init(vb2, buf->dma_addrs, video->fmtinfo,
+				  &video->pix);
 
 	return 0;
 }
@@ -793,23 +822,9 @@ static int mxc_isi_vb2_buffer_init(struct vb2_buffer *vb2)
 static int mxc_isi_vb2_buffer_prepare(struct vb2_buffer *vb2)
 {
 	struct mxc_isi_video *video = vb2_get_drv_priv(vb2->vb2_queue);
-	const struct mxc_isi_format_info *fmt = video->fmtinfo;
-	unsigned int i;
 
-	for (i = 0; i < fmt->memplanes; i++) {
-		unsigned long size = video->pix.plane_fmt[i].sizeimage;
-
-		if (vb2_plane_size(vb2, i) < size) {
-			dev_err(video->pipe->isi->dev,
-				"User buffer too small (%ld < %ld)\n",
-				vb2_plane_size(vb2, i), size);
-			return -EINVAL;
-		}
-
-		vb2_set_plane_payload(vb2, i, size);
-	}
-
-	return 0;
+	return mxc_isi_video_buffer_prepare(video->pipe->isi, vb2,
+					    video->fmtinfo, &video->pix);
 }
 
 static void mxc_isi_vb2_buffer_queue(struct vb2_buffer *vb2)
