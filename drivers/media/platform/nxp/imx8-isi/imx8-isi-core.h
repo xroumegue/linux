@@ -90,7 +90,7 @@ struct mxc_isi_format_info {
 	enum mxc_isi_video_type type;
 	u32	isi_in_format;
 	u32	isi_out_format;
-	u16	memplanes;
+	u8	mem_planes;
 	u8	depth[MXC_MAX_PLANES];
 	u8	hsub;
 	u8	vsub;
