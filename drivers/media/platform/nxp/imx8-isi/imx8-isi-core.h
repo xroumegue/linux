@@ -91,6 +91,7 @@ struct mxc_isi_format_info {
 	u32	isi_in_format;
 	u32	isi_out_format;
 	u8	mem_planes;
+	u8	color_planes;
 	u8	depth[MXC_MAX_PLANES];
 	u8	hsub;
 	u8	vsub;
