@@ -41,8 +41,6 @@
 		spi0 = &flexspi;
 		isi0 = &isi_0;
 		isi1 = &isi_1;
-		csi0 = &mipi_csi_0;
-		csi1 = &mipi_csi_1;
 		isp0 = &isp_0;
 		isp1 = &isp_1;
 	};
@@ -1435,6 +1433,66 @@
 				reg = <0x32ec0090 0x28>;
 			};
 
+			mipi_csi_0: csi@32e40000 {
+				compatible = "fsl,imx8mp-mipi-csi2", "fsl,imx8mm-mipi-csi2";
+				reg = <0x32e40000 0x10000>;
+				interrupts = <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
+				clock-frequency = <500000000>;
+				clocks = <&clk IMX8MP_CLK_MEDIA_APB>,
+					 <&clk IMX8MP_CLK_MEDIA_CAM1_PIX>,
+					 <&clk IMX8MP_CLK_MEDIA_MIPI_PHY1_REF>,
+					 <&clk IMX8MP_CLK_MEDIA_AXI>;
+				clock-names = "pclk", "wrap", "phy", "axi";
+				assigned-clocks = <&clk IMX8MP_CLK_MEDIA_CAM1_PIX>;
+				assigned-clock-parents = <&clk IMX8MP_SYS_PLL2_1000M>;
+				assigned-clock-rates = <500000000>;
+				power-domains = <&mipi_phy1_pd>;
+				status = "disabled";
+
+				ports {
+					#address-cells = <1>;
+					#size-cells = <0>;
+
+					port@0 {
+						reg = <0>;
+					};
+
+					port@1 {
+						reg = <1>;
+					};
+				};
+			};
+
+			mipi_csi_1: csi@32e50000 {
+				compatible = "fsl,imx8mp-mipi-csi2", "fsl,imx8mm-mipi-csi2";
+				reg = <0x32e50000 0x10000>;
+				interrupts = <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>;
+				clock-frequency = <266000000>;
+				clocks = <&clk IMX8MP_CLK_MEDIA_APB>,
+					 <&clk IMX8MP_CLK_MEDIA_CAM2_PIX>,
+					 <&clk IMX8MP_CLK_MEDIA_MIPI_PHY1_REF>,
+					 <&clk IMX8MP_CLK_MEDIA_AXI>;
+				clock-names = "pclk", "wrap", "phy", "axi";
+				assigned-clocks = <&clk IMX8MP_CLK_MEDIA_CAM2_PIX>;
+				assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_266M>;
+				assigned-clock-rates = <266000000>;
+				power-domains = <&mipi_phy2_pd>;
+				status = "disabled";
+
+				ports {
+					#address-cells = <1>;
+					#size-cells = <0>;
+
+					port@0 {
+						reg = <0>;
+					};
+
+					port@1 {
+						reg = <1>;
+					};
+				};
+			};
+
 			isi_chain_buf: isi_chain@32e02000{
 				compatible = "fsl,imx8mp-iomuxc-gpr", "syscon";
 				reg = <0x32e02000 0x4>;
@@ -1572,61 +1630,6 @@
 					status = "disabled";
 				};
 
-				mipi_csi_0: csi@32e40000 {
-					compatible = "fsl,imx8mp-mipi-csi", "fsl,imx8mn-mipi-csi";
-					reg = <0x32e40000 0x10000>;
-					interrupts = <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
-					clock-frequency = <500000000>;
-					clocks = <&clk IMX8MP_CLK_MEDIA_CAM1_PIX>,
-						 <&clk IMX8MP_CLK_MEDIA_AXI>,
-						 <&clk IMX8MP_CLK_MEDIA_APB>,
-						 <&media_blk_ctrl IMX8MP_CLK_MEDIA_BLK_CTRL_MIPI_CSI_PCLK>,
-						 <&media_blk_ctrl IMX8MP_CLK_MEDIA_BLK_CTRL_MIPI_CSI_ACLK>;
-					clock-names = "mipi_clk",
-						      "disp_axi",
-						      "disp_apb",
-						      "media_blk_csi_pclk",
-						      "media_blk_csi_aclk";
-					assigned-clocks = <&clk IMX8MP_CLK_MEDIA_CAM1_PIX>;
-					assigned-clock-parents = <&clk IMX8MP_SYS_PLL2_1000M>;
-					assigned-clock-rates = <500000000>;
-					bus-width = <4>;
-					csi-gpr = <&mediamix_gasket0>;
-					gpr = <&media_blk_ctrl>;
-					resets = <&media_blk_ctrl IMX8MP_MEDIA_BLK_CTRL_RESET_MIPI_CSI_PCLK>,
-						 <&media_blk_ctrl IMX8MP_MEDIA_BLK_CTRL_RESET_MIPI_CSI_ACLK>;
-					reset-names = "csi_rst_pclk", "csi_rst_aclk";
-					power-domains = <&mipi_phy1_pd>;
-					status = "disabled";
-				};
-
-				mipi_csi_1: csi@32e50000 {
-					compatible = "fsl,imx8mp-mipi-csi", "fsl,imx8mn-mipi-csi";
-					reg = <0x32e50000 0x10000>;
-					interrupts = <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>;
-					clock-frequency = <266000000>;
-					clocks = <&clk IMX8MP_CLK_MEDIA_CAM2_PIX>,
-						 <&clk IMX8MP_CLK_MEDIA_AXI>,
-						 <&clk IMX8MP_CLK_MEDIA_APB>,
-						 <&media_blk_ctrl IMX8MP_CLK_MEDIA_BLK_CTRL_MIPI_CSI2_PCLK>,
-						 <&media_blk_ctrl IMX8MP_CLK_MEDIA_BLK_CTRL_MIPI_CSI2_ACLK>;
-					clock-names = "mipi_clk",
-						      "disp_axi",
-						      "disp_apb",
-						      "media_blk_csi_pclk",
-						      "media_blk_csi_aclk";
-					assigned-clocks = <&clk IMX8MP_CLK_MEDIA_CAM2_PIX>;
-					assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_266M>;
-					assigned-clock-rates = <266000000>;
-					bus-width = <4>;
-					csi-gpr = <&mediamix_gasket1>;
-					gpr = <&media_blk_ctrl>;
-					resets = <&media_blk_ctrl IMX8MP_MEDIA_BLK_CTRL_RESET_MIPI_CSI2_PCLK>,
-						 <&media_blk_ctrl IMX8MP_MEDIA_BLK_CTRL_RESET_MIPI_CSI2_ACLK>;
-					reset-names = "csi_rst_pclk", "csi_rst_aclk";
-					power-domains = <&mipi_phy2_pd>;
-					status = "disabled";
-				};
 			};
 
 			pcie_phy: pcie-phy@32f00000 {
