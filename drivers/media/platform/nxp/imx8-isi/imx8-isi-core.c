@@ -14,6 +14,7 @@
 #include <linux/pm.h>
 #include <linux/pm_runtime.h>
 #include <linux/property.h>
+#include <linux/reset.h>
 #include <linux/slab.h>
 #include <linux/string.h>
 #include <linux/sys_soc.h>
@@ -348,6 +349,20 @@ static const struct mxc_isi_plat_data mxc_imx8mn_data = {
 	.has_36bit_dma		= false,
 };
 
+static const struct clk_bulk_data mxc_imx8mp_clks[] = {
+	{ .id = "axi" },
+	{ .id = "apb" },
+	{ .id = "media_blk_bus" },
+	{ .id = "media_blk_isi_proc" },
+	{ .id = "media_blk_isi_apb" },
+};
+
+static const struct reset_control_bulk_data mxc_imx8mp_resets[] = {
+	{ .id = "isi_rst_proc" },
+	{ .id = "isi_rst_apb" },
+	{ .id = "isi_rst_bus" },
+};
+
 static const struct mxc_isi_plat_data mxc_imx8mp_data = {
 	.model			= MXC_ISI_IMX8MP,
 	.num_ports		= 2,
@@ -355,8 +370,10 @@ static const struct mxc_isi_plat_data mxc_imx8mp_data = {
 	.reg_offset		= 0x2000,
 	.ier_reg		= &mxc_imx8_isi_ier_v2,
 	.set_thd		= &mxc_imx8_isi_thd_v1,
-	.clks			= mxc_imx8mn_clks,
-	.num_clks		= ARRAY_SIZE(mxc_imx8mn_clks),
+	.clks			= mxc_imx8mp_clks,
+	.num_clks		= ARRAY_SIZE(mxc_imx8mp_clks),
+	.resets			= mxc_imx8mp_resets,
+	.num_resets		= ARRAY_SIZE(mxc_imx8mp_resets),
 	.buf_active_reverse	= true,
 	.has_gasket		= true,
 	.has_36bit_dma		= true,
@@ -472,6 +489,7 @@ static int mxc_isi_runtime_resume(struct device *dev)
 
 	ret = clk_bulk_prepare_enable(isi->pdata->num_clks, isi->clks);
 	if (ret) {
+		reset_control_bulk_assert(isi->pdata->num_resets, isi->resets);
 		dev_err(dev, "Failed to enable clocks (%d)\n", ret);
 		return ret;
 	}
@@ -505,6 +523,24 @@ static int mxc_isi_clk_get(struct mxc_isi_dev *isi)
 	if (ret < 0) {
 		dev_err(isi->dev, "Failed to acquire clocks: %d\n",
 			ret);
+		return ret;
+	}
+
+	if (!isi->pdata->num_resets)
+		return 0;
+
+	size = isi->pdata->num_resets * sizeof(*isi->resets);
+	isi->resets = devm_kmalloc(isi->dev, size, GFP_KERNEL);
+	if (!isi->resets)
+		return -ENOMEM;
+
+	memcpy(isi->resets, isi->pdata->resets, size);
+
+	ret = devm_reset_control_bulk_get_exclusive(isi->dev,
+						    isi->pdata->num_resets,
+						    isi->resets);
+	if (ret < 0) {
+		dev_err(isi->dev, "Failed to acquire resets: %d\n", ret);
 		return ret;
 	}
 
@@ -563,6 +599,12 @@ static int mxc_isi_probe(struct platform_device *pdev)
 	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(dma_size));
 	if (ret) {
 		dev_err(dev, "failed to set DMA mask\n");
+		return ret;
+	}
+
+	ret = reset_control_bulk_deassert(isi->pdata->num_resets, isi->resets);
+	if (ret) {
+		dev_err(dev, "Failed to deassert resets (%d)\n", ret);
 		return ret;
 	}
 

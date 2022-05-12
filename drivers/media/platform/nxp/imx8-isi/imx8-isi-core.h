@@ -31,6 +31,7 @@ struct dentry;
 struct device;
 struct media_intf_devnode;
 struct regmap;
+struct reset_control_bulk_data;
 struct v4l2_m2m_dev;
 
 /* Pipeline pads */
@@ -162,6 +163,8 @@ struct mxc_isi_plat_data {
 	const struct mxc_isi_set_thd *set_thd;
 	const struct clk_bulk_data *clks;
 	unsigned int num_clks;
+	const struct reset_control_bulk_data *resets;
+	unsigned int num_resets;
 	bool buf_active_reverse;
 	bool has_gasket;
 	bool has_36bit_dma;
@@ -273,6 +276,7 @@ struct mxc_isi_dev {
 
 	void __iomem			*regs;
 	struct clk_bulk_data		*clks;
+	struct reset_control_bulk_data	*resets;
 	struct regmap			*gasket;
 
 	struct mxc_isi_crossbar		crossbar;
