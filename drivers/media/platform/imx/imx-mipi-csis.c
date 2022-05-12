@@ -297,6 +297,13 @@ static const char * const mipi_csis_clk_id[] = {
 	"wrap",
 	"phy",
 	"axi",
+	"media_blk_csi_pclk",
+	"media_blk_csi_aclk",
+};
+
+static const char * const mipi_csis_reset_id[] = {
+	"csi_rst_pclk",
+	"csi_rst_aclk",
 };
 
 enum mipi_csis_version {
@@ -307,12 +314,14 @@ enum mipi_csis_version {
 struct mipi_csis_info {
 	enum mipi_csis_version version;
 	unsigned int num_clocks;
+	unsigned int num_resets;
 };
 
 struct mipi_csis_device {
 	struct device *dev;
 	void __iomem *regs;
 	struct clk_bulk_data *clks;
+	struct reset_control_bulk_data *resets;
 	struct reset_control *mrst;
 	struct regulator *mipi_phy_regulator;
 	const struct mipi_csis_info *info;
@@ -691,12 +700,25 @@ static void mipi_csis_set_params(struct mipi_csis_device *csis)
 
 static int mipi_csis_clk_enable(struct mipi_csis_device *csis)
 {
-	return clk_bulk_prepare_enable(csis->info->num_clocks, csis->clks);
+	int ret;
+
+	ret = reset_control_bulk_deassert(csis->info->num_resets, csis->resets);
+	if (ret)
+		return ret;
+
+	ret = clk_bulk_prepare_enable(csis->info->num_clocks, csis->clks);
+	if (ret < 0) {
+		reset_control_bulk_assert(csis->info->num_resets, csis->resets);
+		return ret;
+	}
+
+	return 0;
 }
 
 static void mipi_csis_clk_disable(struct mipi_csis_device *csis)
 {
 	clk_bulk_disable_unprepare(csis->info->num_clocks, csis->clks);
+	reset_control_bulk_assert(csis->info->num_resets, csis->resets);
 }
 
 static int mipi_csis_clk_get(struct mipi_csis_device *csis)
@@ -721,11 +743,30 @@ static int mipi_csis_clk_get(struct mipi_csis_device *csis)
 	/* Set clock rate */
 	ret = clk_set_rate(csis->clks[MIPI_CSIS_CLK_WRAP].clk,
 			   csis->clk_frequency);
-	if (ret < 0)
+	if (ret < 0) {
 		dev_err(csis->dev, "set rate=%d failed: %d\n",
 			csis->clk_frequency, ret);
+		return ret;
+	}
 
-	return ret;
+	if (!csis->info->num_resets)
+		return 0;
+
+	csis->resets = devm_kcalloc(csis->dev, csis->info->num_resets,
+				    sizeof(*csis->resets), GFP_KERNEL);
+	if (!csis->resets)
+		return -ENOMEM;
+
+	for (i = 0; i < csis->info->num_resets; i++)
+		csis->resets[i].id = mipi_csis_reset_id[i];
+
+	ret = devm_reset_control_bulk_get_exclusive(csis->dev,
+						    csis->info->num_resets,
+						    csis->resets);
+	if (ret < 0)
+		return ret;
+
+	return 0;
 }
 
 static void mipi_csis_start_stream(struct mipi_csis_device *csis)
@@ -1572,6 +1613,13 @@ static const struct of_device_id mipi_csis_of_match[] = {
 		.data = &(const struct mipi_csis_info){
 			.version = MIPI_CSIS_V3_6_3,
 			.num_clocks = 4,
+		},
+	}, {
+		.compatible = "fsl,imx8mp-mipi-csi2",
+		.data = &(const struct mipi_csis_info){
+			.version = MIPI_CSIS_V3_6_3,
+			.num_clocks = 6,
+			.num_resets = 2,
 		},
 	},
 	{ /* sentinel */ },
