@@ -55,7 +55,7 @@ static int imx_blk_ctrl_reset_set(struct reset_controller_dev *rcdev,
 	u32 reg;
 
 	if (!assert && !test_bit(1, &drvdata->rst_hws[id].asserted))
-		return -ENODEV;
+		return 0;
 
 	if (assert && !test_and_set_bit(1, &drvdata->rst_hws[id].asserted))
 		pm_runtime_get_sync(rcdev->dev);
