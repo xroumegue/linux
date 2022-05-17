@@ -1336,10 +1336,6 @@
 	};
 };
 
-&cameradev {
-	status = "okay";
-};
-
 &isi_0 {
 	status = "okay";
 };
