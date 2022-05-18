@@ -55,10 +55,6 @@
 	/delete-node/port@1;
 };
 
-&cameradev {
-	status = "okay";
-};
-
 &isi_0 {
 	status = "disabled";
 };
@@ -67,7 +63,7 @@
 	status = "okay";
 };
 
-&dewarp {
+&dwe {
 	status = "okay";
 };
 

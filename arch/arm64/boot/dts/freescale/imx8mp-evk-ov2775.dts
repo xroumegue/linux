@@ -78,15 +78,7 @@
 	};
 };
 
-&cameradev {
-	status = "okay";
-};
-
 &isi_0 {
-	status = "disabled";
-};
-
-&isi_1 {
 	status = "disabled";
 };
 
@@ -94,7 +86,7 @@
 	status = "okay";
 };
 
-&dewarp {
+&dwe {
 	status = "okay";
 };
 

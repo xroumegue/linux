@@ -115,10 +115,6 @@
 	status = "disabled";
 };
 
-&isi_1 {
-	status = "disabled";
-};
-
 &isp_0 {
 	status = "okay";
 };
@@ -127,6 +123,6 @@
 	status = "okay";
 };
 
-&dewarp {
+&dwe {
 	status = "okay";
 };
