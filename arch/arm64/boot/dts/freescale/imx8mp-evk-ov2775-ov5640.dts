@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 /*
+ * Copyright (C) 2020 Basler AG
  * Copyright 2020 NXP
  *
  * This program is free software; you can redistribute it and/or
@@ -13,89 +14,7 @@
  * GNU General Public License for more details.
  */
 
-#include "imx8mp-evk.dts"
+/dts-v1/;
 
-&iomuxc {
-	pinctrl_csi1_pwn: csi1_pwn_grp {
-		fsl,pins = <
-			MX8MP_IOMUXC_SAI1_RXC__GPIO4_IO01	0x19
-		>;
-	};
-
-	pinctrl_csi1_rst: csi1_rst_grp {
-		fsl,pins = <
-			MX8MP_IOMUXC_SAI1_RXFS__GPIO4_IO00	0x19
-		>;
-	};
-};
-
-&i2c2 {
-	/delete-node/ov5640_mipi@3c;
-
-	ov2775_0: ov2775_mipi@36 {
-		compatible = "ovti,ov2775";
-		reg = <0x36>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_csi0_pwn>, <&pinctrl_csi0_rst>;
-		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
-		clock-names = "csi_mclk";
-		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
-		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
-		assigned-clock-rates = <24000000>;
-		csi_id = <0>;
-		pwn-gpios = <&gpio2 11 GPIO_ACTIVE_HIGH>;
-		rst-gpios = <&gpio1 6 GPIO_ACTIVE_LOW>;
-		mclk = <24000000>;
-		mclk_source = <0>;
-		status = "okay";
-
-		port {
-			ov2775_mipi_0_ep: endpoint {
-				data-lanes = <1 2 3 4>;
-				clock-lanes = <0>;
-				max-pixel-frequency = /bits/ 64 <266000000>;
-				remote-endpoint = <&mipi_csi0_ep>;
-			};
-		};
-
-	};
-};
-
-&i2c3 {
-	/delete-node/ov2775_mipi@36;
-};
-
-&ov5640_1 {
-	pinctrl-0 = <&pinctrl_csi1_pwn>, <&pinctrl_csi1_rst>, <&pinctrl_csi_mclk>;
-	csi_id = <1>;
-
-	status = "okay";
-};
-
-&isi_0 {
-	status = "okay";
-};
-
-&isp_0 {
-	status = "okay";
-};
-
-&dwe {
-	status = "okay";
-};
-
-&mipi_csi_0 {
-	status = "okay";
-
-	port@0 {
-		endpoint {
-			remote-endpoint = <&ov2775_mipi_0_ep>;
-			data-lanes = <4>;
-			csis-hs-settle = <16>;
-		};
-	};
-};
-
-&mipi_csi_1 {
-	status = "okay";
+/ {
 };
