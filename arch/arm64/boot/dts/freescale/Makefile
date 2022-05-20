@@ -145,6 +145,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb.dtb \
 			  imx8mp-isi-overlay.dtb \
 			  imx8mp-isp0-overlay.dtb \
 			  imx8mp-isp1-overlay.dtb \
+			  imx8mp-evk-ov5640-overlay.dtb \
 			  imx8mp-edm-g-wb-tevi_ov5640-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-hummingboard-pulse.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-kontron-pitx-imx8m.dtb
