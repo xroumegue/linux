@@ -486,15 +486,39 @@ static void imx7_csi_configure(struct imx7_csi *csi)
 			cr3 |= BIT_TWO_8BIT_SENSOR;
 			cr18 |= BIT_MIPI_DATA_FORMAT_RAW14;
 			break;
+
 		/*
-		 * CSI-2 sources are supposed to use the 1X16 formats, but not
-		 * all of them comply. Support both variants.
+		 * The CSI bridge has a 16-bit input bus. Depending on the
+		 * connected source, data may be transmitted with 8 or 10 bits
+		 * per clock sample (in bits [9:2] or [9:0] respectively) or
+		 * with 16 bits per clock sample (in bits [15:0]). The data is
+		 * then packed into a 32-bit FIFO (as shown in figure 13-11 of
+		 * the i.MX8MM reference manual rev. 3).
+		 *
+		 * The data packing in a 32-bit FIFO input word is controlled by
+		 * the CR3 TWO_8BIT_SENSOR field (also known as SENSOR_16BITS in
+		 * the i.MX8MM reference manual). When set to 0, data packing
+		 * groups four 8-bit input samples (bits [9:2]). When set to 1,
+		 * data packing groups two 16-bit input samples (bits [15:0]).
+		 *
+		 * The register field CR18 MIPI_DOUBLE_CMPNT also needs to be
+		 * configured according to the input format for YUV 4:2:2 data.
+		 * The field controls the gasket between the CSI-2 receiver and
+		 * the CSI bridge. On i.MX7 and i.MX8MM, the field must be set
+		 * to 1 when the CSIS outputs 16-bit samples. On i.MX8MQ, the
+		 * gasket ignores the MIPI_DOUBLE_CMPNT bit and YUV 4:2:2 always
+		 * uses 16-bit samples. Setting MIPI_DOUBLE_CMPNT in that case
+		 * has no effect, but doesn't cause any issue.
 		 */
 		case MEDIA_BUS_FMT_UYVY8_2X8:
-		case MEDIA_BUS_FMT_UYVY8_1X16:
 		case MEDIA_BUS_FMT_YUYV8_2X8:
-		case MEDIA_BUS_FMT_YUYV8_1X16:
 			cr18 |= BIT_MIPI_DATA_FORMAT_YUV422_8B;
+			break;
+		case MEDIA_BUS_FMT_UYVY8_1X16:
+		case MEDIA_BUS_FMT_YUYV8_1X16:
+			cr3 |= BIT_TWO_8BIT_SENSOR;
+			cr18 |= BIT_MIPI_DATA_FORMAT_YUV422_8B |
+				BIT_MIPI_DOUBLE_CMPNT;
 			break;
 		}
 	}
@@ -1099,13 +1123,13 @@ static int imx7_csi_async_register(struct imx7_csi *csi)
 	struct fwnode_handle *ep;
 	int ret;
 
-	v4l2_async_notifier_init(&csi->notifier);
+	v4l2_async_nf_init(&csi->notifier);
 
 	ep = fwnode_graph_get_endpoint_by_id(dev_fwnode(csi->dev), 0, 0,
 					     FWNODE_GRAPH_ENDPOINT_NEXT);
 	if (ep) {
-		asd = v4l2_async_notifier_add_fwnode_remote_subdev(
-			&csi->notifier, ep, struct v4l2_async_subdev);
+		asd = v4l2_async_nf_add_fwnode_remote(&csi->notifier, ep,
+						      struct v4l2_async_subdev);
 
 		fwnode_handle_put(ep);
 
@@ -1119,7 +1143,7 @@ static int imx7_csi_async_register(struct imx7_csi *csi)
 
 	csi->notifier.ops = &imx7_csi_notify_ops;
 
-	ret = v4l2_async_subdev_notifier_register(&csi->sd, &csi->notifier);
+	ret = v4l2_async_subdev_nf_register(&csi->sd, &csi->notifier);
 	if (ret)
 		return ret;
 
@@ -1210,12 +1234,12 @@ static int imx7_csi_probe(struct platform_device *pdev)
 	return 0;
 
 subdev_notifier_cleanup:
-	v4l2_async_notifier_unregister(&csi->notifier);
-	v4l2_async_notifier_cleanup(&csi->notifier);
+	v4l2_async_nf_unregister(&csi->notifier);
+	v4l2_async_nf_cleanup(&csi->notifier);
 
 cleanup:
-	v4l2_async_notifier_unregister(&imxmd->notifier);
-	v4l2_async_notifier_cleanup(&imxmd->notifier);
+	v4l2_async_nf_unregister(&imxmd->notifier);
+	v4l2_async_nf_cleanup(&imxmd->notifier);
 	v4l2_device_unregister(&imxmd->v4l2_dev);
 	media_device_unregister(&imxmd->md);
 	media_device_cleanup(&imxmd->md);
@@ -1232,15 +1256,15 @@ static int imx7_csi_remove(struct platform_device *pdev)
 	struct imx7_csi *csi = v4l2_get_subdevdata(sd);
 	struct imx_media_dev *imxmd = csi->imxmd;
 
-	v4l2_async_notifier_unregister(&imxmd->notifier);
-	v4l2_async_notifier_cleanup(&imxmd->notifier);
+	v4l2_async_nf_unregister(&imxmd->notifier);
+	v4l2_async_nf_cleanup(&imxmd->notifier);
 
 	media_device_unregister(&imxmd->md);
 	v4l2_device_unregister(&imxmd->v4l2_dev);
 	media_device_cleanup(&imxmd->md);
 
-	v4l2_async_notifier_unregister(&csi->notifier);
-	v4l2_async_notifier_cleanup(&csi->notifier);
+	v4l2_async_nf_unregister(&csi->notifier);
+	v4l2_async_nf_cleanup(&csi->notifier);
 	v4l2_async_unregister_subdev(sd);
 
 	mutex_destroy(&csi->lock);

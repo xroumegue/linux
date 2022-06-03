@@ -47,13 +47,9 @@ static char *fourcc_to_str(u32 fmt)
 static int cal_querycap(struct file *file, void *priv,
 			struct v4l2_capability *cap)
 {
-	struct cal_ctx *ctx = video_drvdata(file);
-
 	strscpy(cap->driver, CAL_MODULE_NAME, sizeof(cap->driver));
 	strscpy(cap->card, CAL_MODULE_NAME, sizeof(cap->card));
 
-	snprintf(cap->bus_info, sizeof(cap->bus_info),
-		 "platform:%s", dev_name(ctx->cal->dev));
 	return 0;
 }
 
@@ -711,7 +707,7 @@ static int cal_start_streaming(struct vb2_queue *vq, unsigned int count)
 	dma_addr_t addr;
 	int ret;
 
-	ret = media_pipeline_start(&ctx->vdev.entity, &ctx->phy->pipe);
+	ret = media_pipeline_start(ctx->vdev.entity.pads, &ctx->phy->pipe);
 	if (ret < 0) {
 		ctx_err(ctx, "Failed to start media pipeline: %d\n", ret);
 		goto error_release_buffers;
@@ -764,7 +760,7 @@ error_stop:
 	cal_ctx_unprepare(ctx);
 
 error_pipeline:
-	media_pipeline_stop(&ctx->vdev.entity);
+	media_pipeline_stop(ctx->vdev.entity.pads);
 error_release_buffers:
 	cal_release_buffers(ctx, VB2_BUF_STATE_QUEUED);
 
@@ -785,7 +781,7 @@ static void cal_stop_streaming(struct vb2_queue *vq)
 
 	cal_release_buffers(ctx, VB2_BUF_STATE_ERROR);
 
-	media_pipeline_stop(&ctx->vdev.entity);
+	media_pipeline_stop(ctx->vdev.entity.pads);
 }
 
 static const struct vb2_ops cal_video_qops = {

@@ -464,9 +464,9 @@ static int fimc_md_parse_one_endpoint(struct fimc_md *fmd,
 		return -EINVAL;
 	}
 
-	asd = v4l2_async_notifier_add_fwnode_remote_subdev(
-		&fmd->subdev_notifier, of_fwnode_handle(ep),
-		struct v4l2_async_subdev);
+	asd = v4l2_async_nf_add_fwnode_remote(&fmd->subdev_notifier,
+					      of_fwnode_handle(ep),
+					      struct v4l2_async_subdev);
 
 	of_node_put(ep);
 
@@ -557,7 +557,7 @@ rpm_put:
 
 cleanup:
 	of_node_put(ports);
-	v4l2_async_notifier_cleanup(&fmd->subdev_notifier);
+	v4l2_async_nf_cleanup(&fmd->subdev_notifier);
 	pm_runtime_put(fmd->pmf);
 	return ret;
 }
@@ -1164,7 +1164,7 @@ static int __fimc_md_modify_pipeline(struct media_entity *entity, bool enable)
 static int __fimc_md_modify_pipelines(struct media_entity *entity, bool enable,
 				      struct media_graph *graph)
 {
-	struct media_entity *entity_err = entity;
+	struct media_pad *pad, *pad_err = entity->pads;
 	int ret;
 
 	/*
@@ -1173,13 +1173,13 @@ static int __fimc_md_modify_pipelines(struct media_entity *entity, bool enable,
 	 * through active links. This is needed as we cannot power on/off the
 	 * subdevs in random order.
 	 */
-	media_graph_walk_start(graph, entity);
+	media_graph_walk_start(graph, pad_err);
 
-	while ((entity = media_graph_walk_next(graph))) {
-		if (!is_media_entity_v4l2_video_device(entity))
+	while ((pad = media_graph_walk_next(graph))) {
+		if (!is_media_entity_v4l2_video_device(pad->entity))
 			continue;
 
-		ret  = __fimc_md_modify_pipeline(entity, enable);
+		ret  = __fimc_md_modify_pipeline(pad->entity, enable);
 
 		if (ret < 0)
 			goto err;
@@ -1188,15 +1188,15 @@ static int __fimc_md_modify_pipelines(struct media_entity *entity, bool enable,
 	return 0;
 
 err:
-	media_graph_walk_start(graph, entity_err);
+	media_graph_walk_start(graph, pad_err);
 
-	while ((entity_err = media_graph_walk_next(graph))) {
-		if (!is_media_entity_v4l2_video_device(entity_err))
+	while ((pad_err = media_graph_walk_next(graph))) {
+		if (!is_media_entity_v4l2_video_device(pad_err->entity))
 			continue;
 
-		__fimc_md_modify_pipeline(entity_err, !enable);
+		__fimc_md_modify_pipeline(pad_err->entity, !enable);
 
-		if (entity_err == entity)
+		if (pad_err == pad)
 			break;
 	}
 
@@ -1481,7 +1481,7 @@ static int fimc_md_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, fmd);
 
-	v4l2_async_notifier_init(&fmd->subdev_notifier);
+	v4l2_async_nf_init(&fmd->subdev_notifier);
 
 	ret = fimc_md_register_platform_entities(fmd, dev->of_node);
 	if (ret)
@@ -1509,8 +1509,8 @@ static int fimc_md_probe(struct platform_device *pdev)
 		fmd->subdev_notifier.ops = &subdev_notifier_ops;
 		fmd->num_sensors = 0;
 
-		ret = v4l2_async_notifier_register(&fmd->v4l2_dev,
-						&fmd->subdev_notifier);
+		ret = v4l2_async_nf_register(&fmd->v4l2_dev,
+					     &fmd->subdev_notifier);
 		if (ret)
 			goto err_clk_p;
 	}
@@ -1522,7 +1522,7 @@ err_clk_p:
 err_attr:
 	device_remove_file(&pdev->dev, &dev_attr_subdev_conf_mode);
 err_cleanup:
-	v4l2_async_notifier_cleanup(&fmd->subdev_notifier);
+	v4l2_async_nf_cleanup(&fmd->subdev_notifier);
 err_m_ent:
 	fimc_md_unregister_entities(fmd);
 err_clk:
@@ -1542,8 +1542,8 @@ static int fimc_md_remove(struct platform_device *pdev)
 		return 0;
 
 	fimc_md_unregister_clk_provider(fmd);
-	v4l2_async_notifier_unregister(&fmd->subdev_notifier);
-	v4l2_async_notifier_cleanup(&fmd->subdev_notifier);
+	v4l2_async_nf_unregister(&fmd->subdev_notifier);
+	v4l2_async_nf_cleanup(&fmd->subdev_notifier);
 
 	v4l2_device_unregister(&fmd->v4l2_dev);
 	device_remove_file(&pdev->dev, &dev_attr_subdev_conf_mode);

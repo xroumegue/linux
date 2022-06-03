@@ -504,7 +504,6 @@ static int cafe_pci_probe(struct pci_dev *pdev,
 	mcam->plat_power_up = cafe_ctlr_power_up;
 	mcam->plat_power_down = cafe_ctlr_power_down;
 	mcam->dev = &pdev->dev;
-	snprintf(mcam->bus_info, sizeof(mcam->bus_info), "PCI:%s", pci_name(pdev));
 	/*
 	 * Vmalloc mode for buffers is traditional with this driver.
 	 * We *might* be able to run DMA_contig, especially on a system
@@ -544,12 +543,11 @@ static int cafe_pci_probe(struct pci_dev *pdev,
 	if (ret)
 		goto out_pdown;
 
-	v4l2_async_notifier_init(&mcam->notifier);
+	v4l2_async_nf_init(&mcam->notifier);
 
-	asd = v4l2_async_notifier_add_i2c_subdev(&mcam->notifier,
-					i2c_adapter_id(cam->i2c_adapter),
-					ov7670_info.addr,
-					struct v4l2_async_subdev);
+	asd = v4l2_async_nf_add_i2c(&mcam->notifier,
+				    i2c_adapter_id(cam->i2c_adapter),
+				    ov7670_info.addr, struct v4l2_async_subdev);
 	if (IS_ERR(asd)) {
 		ret = PTR_ERR(asd);
 		goto out_smbus_shutdown;

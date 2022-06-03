@@ -167,10 +167,11 @@ Drivers initiate a graph traversal by calling
 :c:func:`media_graph_walk_start()`
 
 The graph structure, provided by the caller, is initialized to start graph
-traversal at the given entity.
+traversal at the given pad in an entity.
 
-Drivers can then retrieve the next entity by calling
-:c:func:`media_graph_walk_next()`
+Drivers can then retrieve the next pad by calling
+:c:func:`media_graph_walk_next()`. Only the pad through which the entity
+is first reached is returned.
 
 When the graph traversal is complete the function will return ``NULL``.
 
@@ -210,15 +211,14 @@ When starting streaming, drivers must notify all entities in the pipeline to
 prevent link states from being modified during streaming by calling
 :c:func:`media_pipeline_start()`.
 
-The function will mark all entities connected to the given entity through
-enabled links, either directly or indirectly, as streaming.
+The function will mark all the pads connected to the given pad through
+enabled routes and links, either directly or indirectly, as streaming.
 
 The struct media_pipeline instance pointed to by
-the pipe argument will be stored in every entity in the pipeline.
+the pipe argument will be stored in every pad in the pipeline.
 Drivers should embed the struct media_pipeline
 in higher-level pipeline structures and can then access the
-pipeline through the struct media_entity
-pipe field.
+pipeline through the struct media_pad pipe field.
 
 Calls to :c:func:`media_pipeline_start()` can be nested.
 The pipeline pointer must be identical for all nested calls to the function.
