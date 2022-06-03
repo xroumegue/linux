@@ -251,6 +251,13 @@ enum v4l2_colorspace {
 
 	/* SMPTE ST 428-1 */
 	V4L2_COLORSPACE_ST428         = 14,
+#ifdef __KERNEL__
+	/*
+	 * Largest supported colorspace value, assigned by the compiler, used
+	 * by the framework to check for invalid values.
+	 */
+	V4L2_COLORSPACE_LAST,
+#endif
 };
 
 /*
@@ -310,6 +317,13 @@ enum v4l2_xfer_func {
 	V4L2_XFER_FUNC_XVYCC       = 12,
 	V4L2_XFER_FUNC_BT1361      = 13,
 	V4L2_XFER_FUNC_ST428       = 14,
+#ifdef __KERNEL__
+	/*
+	 * Largest supported transfer function value, assigned by the compiler,
+	 * used by the framework to check for invalid values.
+	 */
+	V4L2_XFER_FUNC_LAST,
+#endif
 };
 
 /*
@@ -373,6 +387,13 @@ enum v4l2_ycbcr_encoding {
 
 	/* KR=0.30, KB=0.11 or equivalent */
 	V4L2_YCBCR_ENC_BT470_6M       = 9,
+#ifdef __KERNEL__
+	/*
+	 * Largest supported encoding value, assigned by the compiler, used by
+	 * the framework to check for invalid values.
+	 */
+	V4L2_YCBCR_ENC_LAST,
+#endif
 };
 
 /*
@@ -408,6 +429,13 @@ enum v4l2_quantization {
 	V4L2_QUANTIZATION_DEFAULT     = 0,
 	V4L2_QUANTIZATION_FULL_RANGE  = 1,
 	V4L2_QUANTIZATION_LIM_RANGE   = 2,
+#ifdef __KERNEL__
+	/*
+	 * Largest supported quantization value, assigned by the compiler, used
+	 * by the framework to check for invalid values.
+	 */
+	V4L2_QUANTIZATION_LAST,
+#endif
 };
 
 /*
@@ -624,6 +652,8 @@ struct v4l2_pix_format {
 #define V4L2_PIX_FMT_XYUV32  v4l2_fourcc('X', 'Y', 'U', 'V') /* 32  XYUV-8-8-8-8  */
 #define V4L2_PIX_FMT_VUYA32  v4l2_fourcc('V', 'U', 'Y', 'A') /* 32  VUYA-8-8-8-8  */
 #define V4L2_PIX_FMT_VUYX32  v4l2_fourcc('V', 'U', 'Y', 'X') /* 32  VUYX-8-8-8-8  */
+#define V4L2_PIX_FMT_YUVA32  v4l2_fourcc('Y', 'U', 'V', 'A') /* 32  YUVA-8-8-8-8  */
+#define V4L2_PIX_FMT_YUVX32  v4l2_fourcc('Y', 'U', 'V', 'X') /* 32  YUVX-8-8-8-8  */
 #define V4L2_PIX_FMT_M420    v4l2_fourcc('M', '4', '2', '0') /* 12  YUV 4:2:0 2 lines y, 1 line uv interleaved */
 
 /* two planes -- one Y, one Cr + Cb interleaved  */

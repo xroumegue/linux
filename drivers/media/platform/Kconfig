@@ -194,6 +194,7 @@ source "drivers/media/platform/rcar-vin/Kconfig"
 source "drivers/media/platform/atmel/Kconfig"
 source "drivers/media/platform/sunxi/Kconfig"
 source "drivers/media/platform/imx/Kconfig"
+source "drivers/media/platform/nxp/imx8-isi/Kconfig"
 
 config VIDEO_TI_CAL
 	tristate "TI CAL (Camera Adaptation Layer) driver"
