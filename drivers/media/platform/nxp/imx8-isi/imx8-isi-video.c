@@ -1206,6 +1206,21 @@ err_release:
 	return ret;
 }
 
+
+static void mxc_isi_video_cleanup_streaming(struct mxc_isi_video *video)
+{
+	lockdep_assert_held(&video->lock);
+
+	if (!video->is_streaming)
+		return;
+
+	mxc_isi_video_free_discard_buffers(video);
+	media_pipeline_stop(video->vdev.entity.pads);
+	mxc_isi_pipe_release(video->pipe);
+
+	video->is_streaming = false;
+}
+
 static int mxc_isi_video_streamoff(struct file *file, void *priv,
 				   enum v4l2_buf_type type)
 {
@@ -1216,11 +1231,7 @@ static int mxc_isi_video_streamoff(struct file *file, void *priv,
 	if (ret)
 		return ret;
 
-	mxc_isi_video_free_discard_buffers(video);
-	media_pipeline_stop(video->vdev.entity.pads);
-	mxc_isi_pipe_release(video->pipe);
-
-	video->is_streaming = false;
+	mxc_isi_video_cleanup_streaming(video);
 
 	return 0;
 }
@@ -1320,6 +1331,10 @@ static int mxc_isi_video_release(struct file *file)
 	ret = vb2_fop_release(file);
 	if (ret)
 		dev_err(video->pipe->isi->dev, "%s fail\n", __func__);
+
+	mutex_lock(&video->lock);
+	mxc_isi_video_cleanup_streaming(video);
+	mutex_unlock(&video->lock);
 
 	pm_runtime_put(video->pipe->isi->dev);
 	return ret;
