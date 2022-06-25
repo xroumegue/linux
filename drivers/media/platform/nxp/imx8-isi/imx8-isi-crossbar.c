@@ -183,7 +183,7 @@ mxc_isi_crossbar_xlate_streams(struct mxc_isi_crossbar *xbar,
 		return ERR_PTR(-EPIPE);
 	}
 
-	pad = media_entity_remote_pad(&xbar->pads[sink_pad]);
+	pad = media_pad_remote_pad_first(&xbar->pads[sink_pad]);
 	sd = media_entity_to_v4l2_subdev(pad->entity);
 
 	if (!sd) {
