@@ -1171,7 +1171,7 @@ static int mxc_isi_video_streamon(struct file *file, void *priv,
 
 	pipe = media_entity_pipeline(&video->vdev.entity) ? : &video->pipe->pipe;
 
-	ret = __media_pipeline_start(video->vdev.entity.pads, pipe);
+	ret = __video_device_pipeline_start(&video->vdev, pipe);
 	if (ret) {
 		mutex_unlock(&mdev->graph_mutex);
 		goto err_release;
@@ -1200,7 +1200,7 @@ static int mxc_isi_video_streamon(struct file *file, void *priv,
 err_free:
 	mxc_isi_video_free_discard_buffers(video);
 err_stop:
-	media_pipeline_stop(video->vdev.entity.pads);
+	video_device_pipeline_stop(&video->vdev);
 err_release:
 	mxc_isi_pipe_release(video->pipe);
 	return ret;
@@ -1215,7 +1215,7 @@ static void mxc_isi_video_cleanup_streaming(struct mxc_isi_video *video)
 		return;
 
 	mxc_isi_video_free_discard_buffers(video);
-	media_pipeline_stop(video->vdev.entity.pads);
+	video_device_pipeline_stop(&video->vdev);
 	mxc_isi_pipe_release(video->pipe);
 
 	video->is_streaming = false;
