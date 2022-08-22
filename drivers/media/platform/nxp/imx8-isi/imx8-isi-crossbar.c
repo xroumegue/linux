@@ -444,7 +444,7 @@ static const struct v4l2_subdev_ops mxc_isi_crossbar_subdev_ops = {
 static const struct media_entity_operations mxc_isi_cross_entity_ops = {
 	.get_fwnode_pad = v4l2_subdev_get_fwnode_pad_1_to_1,
 	.link_validate	= v4l2_subdev_link_validate,
-	.has_route = v4l2_subdev_has_route,
+	.has_pad_interdep = v4l2_subdev_has_pad_interdep,
 };
 
 /* -----------------------------------------------------------------------------
@@ -462,7 +462,7 @@ int mxc_isi_crossbar_init(struct mxc_isi_dev *isi)
 	xbar->isi = isi;
 
 	v4l2_subdev_init(sd, &mxc_isi_crossbar_subdev_ops);
-	sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE | V4L2_SUBDEV_FL_MULTIPLEXED;
+	sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE | V4L2_SUBDEV_FL_STREAMS;
 	strscpy(sd->name, "crossbar", sizeof(sd->name));
 	sd->dev = isi->dev;
 
