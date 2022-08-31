@@ -1180,6 +1180,34 @@ int v4l2_subdev_get_fmt(struct v4l2_subdev *sd, struct v4l2_subdev_state *state,
 }
 EXPORT_SYMBOL_GPL(v4l2_subdev_get_fmt);
 
+int v4l2_subdev_set_routing(struct v4l2_subdev *sd,
+			    struct v4l2_subdev_state *state,
+			    const struct v4l2_subdev_krouting *routing)
+{
+	struct v4l2_subdev_krouting *dst = &state->routing;
+	const struct v4l2_subdev_krouting *src = routing;
+	struct v4l2_subdev_krouting new_routing = { 0 };
+
+	lockdep_assert_held(state->lock);
+
+	if (src->num_routes > 0) {
+		new_routing.routes = kmemdup(src->routes,
+			src->num_routes * sizeof(*src->routes),
+			GFP_KERNEL);
+
+		if (!new_routing.routes)
+			return -ENOMEM;
+	}
+
+	new_routing.num_routes = src->num_routes;
+
+	kfree(dst->routes);
+	*dst = new_routing;
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(v4l2_subdev_set_routing);
+
 #endif /* CONFIG_VIDEO_V4L2_SUBDEV_API */
 
 #endif /* CONFIG_MEDIA_CONTROLLER */
