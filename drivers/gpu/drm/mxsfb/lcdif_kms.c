@@ -15,6 +15,7 @@
 #include <drm/drm_atomic.h>
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_bridge.h>
+#include <drm/drm_color_mgmt.h>
 #include <drm/drm_crtc.h>
 #include <drm/drm_encoder.h>
 #include <drm/drm_framebuffer.h>
@@ -37,9 +38,10 @@ static void lcdif_set_formats(struct lcdif_drm_private *lcdif,
 {
 	struct drm_device *drm = lcdif->drm;
 	const u32 format = lcdif->crtc.primary->state->fb->format->format;
+	bool in_yuv = false;
+	bool out_yuv = false;
 
-	writel(CSC0_CTRL_BYPASS, lcdif->base + LCDC_V8_CSC0_CTRL);
-
+	/* HDMI output */
 	switch (bus_format) {
 	case MEDIA_BUS_FMT_RGB565_1X16:
 		writel(DISP_PARA_LINE_PATTERN_RGB565,
@@ -52,24 +54,7 @@ static void lcdif_set_formats(struct lcdif_drm_private *lcdif,
 	case MEDIA_BUS_FMT_UYVY8_1X16:
 		writel(DISP_PARA_LINE_PATTERN_UYVY_H,
 		       lcdif->base + LCDC_V8_DISP_PARA);
-
-		/* CSC: BT.601 Limited Range RGB to YCbCr coefficients. */
-		writel(CSC0_COEF0_A2(0x081) | CSC0_COEF0_A1(0x042),
-		       lcdif->base + LCDC_V8_CSC0_COEF0);
-		writel(CSC0_COEF1_B1(0x7da) | CSC0_COEF1_A3(0x019),
-		       lcdif->base + LCDC_V8_CSC0_COEF1);
-		writel(CSC0_COEF2_B3(0x070) | CSC0_COEF2_B2(0x7b6),
-		       lcdif->base + LCDC_V8_CSC0_COEF2);
-		writel(CSC0_COEF3_C2(0x7a2) | CSC0_COEF3_C1(0x070),
-		       lcdif->base + LCDC_V8_CSC0_COEF3);
-		writel(CSC0_COEF4_D1(0x010) | CSC0_COEF4_C3(0x7ee),
-		       lcdif->base + LCDC_V8_CSC0_COEF4);
-		writel(CSC0_COEF5_D3(0x080) | CSC0_COEF5_D2(0x080),
-		       lcdif->base + LCDC_V8_CSC0_COEF5);
-
-		writel(CSC0_CTRL_CSC_MODE_RGB2YCbCr,
-		       lcdif->base + LCDC_V8_CSC0_CTRL);
-
+		out_yuv = true;
 		break;
 	default:
 		dev_err(drm->dev, "Unknown media bus format 0x%x\n", bus_format);
@@ -77,6 +62,7 @@ static void lcdif_set_formats(struct lcdif_drm_private *lcdif,
 	}
 
 	switch (format) {
+	/* RGB Formats */
 	case DRM_FORMAT_RGB565:
 		writel(CTRLDESCL0_5_BPP_16_RGB565,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
@@ -101,9 +87,86 @@ static void lcdif_set_formats(struct lcdif_drm_private *lcdif,
 		writel(CTRLDESCL0_5_BPP_32_ARGB8888,
 		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
 		break;
+
+	/* YUYV Formats */
+	case DRM_FORMAT_YUYV:
+		writel(CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_VY2UY1,
+		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
+		in_yuv = true;
+		break;
+	case DRM_FORMAT_YVYU:
+		writel(CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_UY2VY1,
+		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
+		in_yuv = true;
+		break;
+	case DRM_FORMAT_UYVY:
+		writel(CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_Y2VY1U,
+		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
+		in_yuv = true;
+		break;
+	case DRM_FORMAT_VYUY:
+		writel(CTRLDESCL0_5_BPP_YCbCr422 | CTRLDESCL0_5_YUV_FORMAT_Y2UY1V,
+		       lcdif->base + LCDC_V8_CTRLDESCL0_5);
+		in_yuv = true;
+		break;
+
 	default:
 		dev_err(drm->dev, "Unknown pixel format 0x%x\n", format);
 		break;
+	}
+
+	/*
+	 * The CSC differentiates between "YCbCr" and "YUV", but the reference
+	 * manual doesn't detail how they differ. Experiments showed that the
+	 * luminance value is unaffected, only the calculations involving chroma
+	 * values differ. The YCbCr mode behaves as expected, with chroma values
+	 * being offset by 128. The YUV mode isn't fully understood.
+	 */
+	if (!in_yuv && out_yuv) {
+		/* RGB -> YCbCr */
+		writel(CSC0_CTRL_CSC_MODE_RGB2YCbCr,
+		       lcdif->base + LCDC_V8_CSC0_CTRL);
+
+		/* CSC: BT.601 Limited Range RGB to YCbCr coefficients. */
+		writel(CSC0_COEF0_A2(0x081) | CSC0_COEF0_A1(0x042),
+		       lcdif->base + LCDC_V8_CSC0_COEF0);
+		writel(CSC0_COEF1_B1(0x7da) | CSC0_COEF1_A3(0x019),
+		       lcdif->base + LCDC_V8_CSC0_COEF1);
+		writel(CSC0_COEF2_B3(0x070) | CSC0_COEF2_B2(0x7b6),
+		       lcdif->base + LCDC_V8_CSC0_COEF2);
+		writel(CSC0_COEF3_C2(0x7a2) | CSC0_COEF3_C1(0x070),
+		       lcdif->base + LCDC_V8_CSC0_COEF3);
+		writel(CSC0_COEF4_D1(0x010) | CSC0_COEF4_C3(0x7ee),
+		       lcdif->base + LCDC_V8_CSC0_COEF4);
+		writel(CSC0_COEF5_D3(0x080) | CSC0_COEF5_D2(0x080),
+		       lcdif->base + LCDC_V8_CSC0_COEF5);
+	} else if (in_yuv && !out_yuv) {
+		/* YCbCr -> RGB */
+		writel(CSC0_CTRL_CSC_MODE_YCbCr2RGB,
+		       lcdif->base + LCDC_V8_CSC0_CTRL);
+
+		/*
+		 * CSC: BT.601 Limited Range YCbCr to RGB coefficients.
+		 *
+		 * Despite the reference manual stating the opposite, the D1,
+		 * D2 and D3 values are added to Y, U and V, not subtracted.
+		 * They must thus be programmed with negative values.
+		 */
+		writel(CSC0_COEF0_A2(0x000) | CSC0_COEF0_A1(0x12a),
+		       lcdif->base + LCDC_V8_CSC0_COEF0);
+		writel(CSC0_COEF1_B1(0x123) | CSC0_COEF1_A3(0x1a2),
+		       lcdif->base + LCDC_V8_CSC0_COEF1);
+		writel(CSC0_COEF2_B3(0x730) | CSC0_COEF2_B2(0x79c),
+		       lcdif->base + LCDC_V8_CSC0_COEF2);
+		writel(CSC0_COEF3_C2(0x204) | CSC0_COEF3_C1(0x124),
+		       lcdif->base + LCDC_V8_CSC0_COEF3);
+		writel(CSC0_COEF4_D1(0x1f0) | CSC0_COEF4_C3(0x000),
+		       lcdif->base + LCDC_V8_CSC0_COEF4);
+		writel(CSC0_COEF5_D3(0x180) | CSC0_COEF5_D2(0x180),
+		       lcdif->base + LCDC_V8_CSC0_COEF5);
+	} else {
+		/* RGB -> RGB, YCbCr -> YCbCr: bypass colorspace converter. */
+		writel(CSC0_CTRL_BYPASS, lcdif->base + LCDC_V8_CSC0_CTRL);
 	}
 }
 
@@ -456,6 +519,12 @@ static const u32 lcdif_primary_plane_formats[] = {
 	DRM_FORMAT_XRGB1555,
 	DRM_FORMAT_XRGB4444,
 	DRM_FORMAT_XRGB8888,
+
+	/* packed YCbCr */
+	DRM_FORMAT_YUYV,
+	DRM_FORMAT_YVYU,
+	DRM_FORMAT_UYVY,
+	DRM_FORMAT_VYUY,
 };
 
 static const u64 lcdif_modifiers[] = {
@@ -481,6 +550,14 @@ int lcdif_kms_init(struct lcdif_drm_private *lcdif)
 				       ARRAY_SIZE(lcdif_primary_plane_formats),
 				       lcdif_modifiers, DRM_PLANE_TYPE_PRIMARY,
 				       NULL);
+	if (ret)
+		return ret;
+
+	ret = drm_plane_create_color_properties(&lcdif->planes.primary,
+						BIT(DRM_COLOR_YCBCR_BT601),
+						BIT(DRM_COLOR_YCBCR_LIMITED_RANGE),
+						DRM_COLOR_YCBCR_BT601,
+						DRM_COLOR_YCBCR_LIMITED_RANGE);
 	if (ret)
 		return ret;
 
