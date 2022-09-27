@@ -27,6 +27,8 @@ config VIDEO_VIU
 	  Say Y here if you want to enable VIU device on MPC5121e Rev2+.
 	  In doubt, say N.
 
+source "drivers/media/platform/nxp/imx8-isi/Kconfig"
+
 # mem2mem drivers
 
 config VIDEO_IMX_PXP
