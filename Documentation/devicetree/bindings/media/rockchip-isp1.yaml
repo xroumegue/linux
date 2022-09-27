@@ -16,6 +16,7 @@ description: |
 properties:
   compatible:
     enum:
+      - fsl,imx8mp-isp
       - rockchip,px30-cif-isp
       - rockchip,rk3399-cif-isp
 
@@ -36,9 +37,9 @@ properties:
     minItems: 3
     items:
       # isp0 and isp1
-      - description: ISP clock
-      - description: ISP AXI clock
-      - description: ISP AHB clock
+      - description: ISP clock (for imx8mp, clk)
+      - description: ISP AXI clock (for imx8mp, m_hclk)
+      - description: ISP AHB clock (for imx8mp, hclk)
       # only for isp1
       - description: ISP Pixel clock
 
@@ -51,6 +52,13 @@ properties:
       - const: hclk
       # only for isp1
       - const: pclk
+
+  fsl,blk-ctrl:
+    $ref: /schemas/types.yaml#/definitions/phandle-array
+    maxItems: 1
+    description:
+      A phandle to the media block control for the ISP, followed by a cell
+      containing the index of the gasket.
 
   iommus:
     maxItems: 1
@@ -112,9 +120,6 @@ required:
   - interrupts
   - clocks
   - clock-names
-  - iommus
-  - phys
-  - phy-names
   - power-domains
   - ports
 
@@ -141,6 +146,26 @@ allOf:
     then:
       required:
         - interrupt-names
+
+  - if:
+      properties:
+        compatible:
+          contains:
+            const: fsl,imx8mp-isp
+    then:
+      properties:
+        iommus: false
+        phys: false
+        phy-names: false
+      required:
+        - fsl,blk-ctrl
+    else:
+      properties:
+        fsl,blk-ctrl: false
+      required:
+        - iommus
+        - phys
+        - phy-names
 
 additionalProperties: false
 
@@ -284,3 +309,75 @@ examples:
             };
         };
     };
+
+  - |
+    #include <dt-bindings/clock/imx8mp-clock.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/media/video-interfaces.h>
+    #include <dt-bindings/power/imx8mp-power.h>
+
+    parent2: parent {
+        #address-cells = <1>;
+        #size-cells = <1>;
+
+        isp@32e10000 {
+            compatible = "fsl,imx8mp-isp";
+            reg = <0x32e10000 0x10000>;
+            interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
+            clocks = <&clk IMX8MP_CLK_MEDIA_ISP_ROOT>,
+                     <&clk IMX8MP_CLK_MEDIA_AXI_ROOT>,
+                     <&clk IMX8MP_CLK_MEDIA_APB_ROOT>;
+            clock-names = "isp", "aclk", "hclk";
+            assigned-clocks = <&clk IMX8MP_CLK_MEDIA_ISP>;
+            assigned-clock-parents = <&clk IMX8MP_SYS_PLL2_500M>;
+            assigned-clock-rates = <500000000>;
+            power-domains = <&media_blk_ctrl IMX8MP_MEDIABLK_PD_ISP>;
+            fsl,blk-ctrl = <&media_blk_ctrl 0>;
+
+            ports {
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                port@1 {
+                    reg = <1>;
+                    isp0_in: endpoint {
+                        bus-type = <MEDIA_BUS_TYPE_PARALLEL>;
+                        remote-endpoint = <&mipi_csi_0_out>;
+                    };
+                };
+            };
+        };
+
+        csi@32e40000 {
+            compatible = "fsl,imx8mp-mipi-csi2", "fsl,imx8mm-mipi-csi2";
+            reg = <0x32e40000 0x10000>;
+            interrupts = <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
+            clock-frequency = <500000000>;
+            clocks = <&clk IMX8MP_CLK_MEDIA_APB_ROOT>,
+                     <&clk IMX8MP_CLK_MEDIA_CAM1_PIX_ROOT>,
+                     <&clk IMX8MP_CLK_MEDIA_MIPI_PHY1_REF_ROOT>,
+                     <&clk IMX8MP_CLK_MEDIA_AXI_ROOT>;
+            clock-names = "pclk", "wrap", "phy", "axi";
+            assigned-clocks = <&clk IMX8MP_CLK_MEDIA_CAM1_PIX>;
+            assigned-clock-parents = <&clk IMX8MP_SYS_PLL2_1000M>;
+            assigned-clock-rates = <500000000>;
+            power-domains = <&media_blk_ctrl IMX8MP_MEDIABLK_PD_MIPI_CSI2_1>;
+
+            ports {
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                port@0 {
+                    reg = <0>;
+                };
+
+                port@1 {
+                    reg = <1>;
+                    mipi_csi_0_out: endpoint {
+                        remote-endpoint = <&isp0_in>;
+                    };
+                };
+            };
+        };
+    };
+...
