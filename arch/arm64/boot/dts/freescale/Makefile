@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 
+DTC_FLAGS_imx8mp-edm-g-wb := -@
+DTC_FLAGS_imx8mp-evk := -@
+
 dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1012a-frdm.dtb
 dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1012a-frwy.dtb
 dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1012a-oxalis.dtb
@@ -84,9 +87,15 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-io-imx219.dtbo
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-dhcom-pdk2.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk.dtb
-dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-isp1.dtb
-dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-isp2.dtb
-dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ov5640-csi1.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-dwe-overlay.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-isi-overlay.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp0-overlay.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp1-overlay.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ov5640-overlay.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ov5640-csi1-overlay.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb-hdmi-overlay.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb-tevi_ov5640-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore-mx8mp-edimm2.2.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp1.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp2.dtb
