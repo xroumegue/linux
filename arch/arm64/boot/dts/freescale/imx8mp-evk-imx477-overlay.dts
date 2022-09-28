@@ -65,13 +65,16 @@
 				assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
 				assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
 				assigned-clock-rates = <24000000>;
+#ifdef IMX477_USE_IMX412
 				reset-gpios = <&gpio2 11 GPIO_ACTIVE_LOW>;
-
+#else
+				reset-gpios = <&gpio2 11 GPIO_ACTIVE_HIGH>;
+#endif
 				port {
 					imx477_out: endpoint {
 						remote-endpoint = <&mipi_csi0_ep>;
 						clock-lanes = <0>;
-#ifdef IMX477_USE_4_LANE
+#ifdef IMX477_USE_IMX412
 						data-lanes = <1 2 3 4>;
 						link-frequencies = /bits/ 64 <600000000>;
 #else
@@ -101,7 +104,7 @@
 					mipi_csi0_ep: endpoint {
 						remote-endpoint = <&imx477_out>;
 						clock-lanes = <0>;
-#ifdef IMX477_USE_4_LANE
+#ifdef IMX477_USE_IMX412
 						data-lanes = <1 2 3 4>;
 #else
 						data-lanes = <1 2>;
