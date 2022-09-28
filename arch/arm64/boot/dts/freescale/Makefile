@@ -93,6 +93,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp0-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp1-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ov5640-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ov5640-csi1-overlay.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-imx477-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb-hdmi-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb-tevi_ov5640-overlay.dtb
