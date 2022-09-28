@@ -71,8 +71,13 @@
 					imx477_out: endpoint {
 						remote-endpoint = <&mipi_csi0_ep>;
 						clock-lanes = <0>;
+#ifdef IMX477_USE_4_LANE
 						data-lanes = <1 2 3 4>;
 						link-frequencies = /bits/ 64 <600000000>;
+#else
+						data-lanes = <1 2>;
+						link-frequencies = /bits/ 64 <450000000>;
+#endif
 					};
 				};
 			};
@@ -96,7 +101,11 @@
 					mipi_csi0_ep: endpoint {
 						remote-endpoint = <&imx477_out>;
 						clock-lanes = <0>;
+#ifdef IMX477_USE_4_LANE
 						data-lanes = <1 2 3 4>;
+#else
+						data-lanes = <1 2>;
+#endif
 					};
 				};
 			};
