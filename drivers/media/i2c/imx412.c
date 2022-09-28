@@ -1293,8 +1293,6 @@ static const struct dev_pm_ops imx412_pm_ops = {
 
 static const struct of_device_id imx412_of_match[] = {
 	{ .compatible = "sony,imx412", .data = "imx412" },
-	{ .compatible = "sony,imx477", .data = "imx477" },
-	{ .compatible = "sony,imx577", .data = "imx577" },
 	{ }
 };
 
