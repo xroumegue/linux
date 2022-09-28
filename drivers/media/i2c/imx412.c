@@ -28,6 +28,7 @@
 /* Chip ID */
 #define IMX412_REG_ID		0x0016
 #define IMX412_ID		0x577
+#define IMX477_ID		0x477
 
 /* Exposure control */
 #define IMX412_REG_EXPOSURE_CIT	0x0202
@@ -899,14 +900,18 @@ static int imx412_detect(struct imx412 *imx412)
 {
 	int ret;
 	u32 val;
+	u32 expected_id = IMX412_ID;
 
 	ret = imx412_read_reg(imx412, IMX412_REG_ID, 2, &val);
 	if (ret)
 		return ret;
 
-	if (val != IMX412_ID) {
-		dev_err(imx412->dev, "chip id mismatch: %x!=%x",
-			IMX412_ID, val);
+	if (strcmp(device_get_match_data(imx412->dev), "imx477") == 0)
+		expected_id = IMX477_ID;
+
+	if (val != expected_id) {
+		dev_err(imx412->dev, "chip id mismatch: %x!=%x %s",
+			expected_id, val, dev_name(imx412->dev));
 		return -ENXIO;
 	}
 
