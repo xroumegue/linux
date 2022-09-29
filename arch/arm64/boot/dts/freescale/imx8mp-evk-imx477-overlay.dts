@@ -81,6 +81,7 @@
 						data-lanes = <1 2>;
 						link-frequencies = /bits/ 64 <450000000>;
 #endif
+						clock-noncontinuous;
 					};
 				};
 			};
@@ -109,6 +110,7 @@
 #else
 						data-lanes = <1 2>;
 #endif
+						clock-noncontinuous;
 					};
 				};
 			};
