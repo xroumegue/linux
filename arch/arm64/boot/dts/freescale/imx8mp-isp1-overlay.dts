@@ -1,7 +1,4 @@
 // SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-/*
- * Copyright 2022 Ideas on Board Oy
- */
 
 /dts-v1/;
 /plugin/;
@@ -10,15 +7,15 @@
 
 / {
 	fragment@0 {
-		target = <&isp_0>;
+		target = <&isp_1>;
 		__overlay__ {
 			status = "okay";
 
 			ports {
 				port@1 {
-					isp0_in: endpoint {
+					isp1_in: endpoint {
 						bus-type = <MEDIA_BUS_TYPE_PARALLEL>;
-						remote-endpoint = <&mipi_csi_0_out>;
+						remote-endpoint = <&mipi_csi_1_out>;
 					};
 				};
 			};
@@ -26,9 +23,15 @@
 	};
 
 	fragment@1 {
-		target = <&mipi_csi_0_out>;
+		target = <&mipi_csi_1>;
 		__overlay__ {
-			remote-endpoint = <&isp0_in>;
+			ports {
+				port@1 {
+					mipi_csi_1_out: endpoint {
+						remote-endpoint = <&isp1_in>;
+					};
+				};
+			};
 		};
 	};
 
@@ -36,7 +39,7 @@
 		target = <&isi_0>;
 		__overlay__ {
 			ports {
-				port@0 {
+				port@1 {
 					/delete-node/ endpoint;
 				};
 			};
