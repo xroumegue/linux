@@ -2,6 +2,7 @@
 
 DTC_FLAGS_imx8mp-debix-model-a := -@
 DTC_FLAGS_imx8mp-evk := -@
+DTC_FLAGS_imx8mp-edm-g-wb := -@
 
 dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1012a-frdm.dtb
 dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1012a-frwy.dtb
@@ -94,6 +95,9 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp1-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ov5640-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ov5640-csi1-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-imx477-overlay.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb-hdmi-overlay.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-edm-g-wb-tevi_ov5640-overlay.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore-mx8mp-edimm2.2.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp1.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp2.dtb
