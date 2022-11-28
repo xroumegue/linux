@@ -590,8 +590,20 @@ int try_set_ext_ctrls_common(struct v4l2_fh *fh,
 	ret = prepare_ext_ctrls(hdl, cs, helpers, vdev, false);
 	if (!ret)
 		ret = validate_ctrls(cs, helpers, vdev, set);
-	if (ret && set)
-		cs->error_idx = cs->count;
+	if (ret) {
+		if (set)
+			cs->error_idx = cs->count;
+		goto out_free;
+	}
+
+	if (set && hdl->ops && hdl->ops->begin) {
+		ret = hdl->ops->begin(hdl);
+		if (ret < 0) {
+			cs->error_idx = cs->count;
+			goto out_free;
+		}
+	}
+
 	for (i = 0; !ret && i < cs->count; i++) {
 		struct v4l2_ctrl *master;
 		u32 idx = i;
@@ -681,6 +693,10 @@ int try_set_ext_ctrls_common(struct v4l2_fh *fh,
 		v4l2_ctrl_unlock(master);
 	}
 
+	if (set && hdl->ops && hdl->ops->end)
+		ret = hdl->ops->end(hdl, ret == 0);
+
+out_free:
 	if (cs->count > ARRAY_SIZE(helper))
 		kvfree(helpers);
 	return ret;
