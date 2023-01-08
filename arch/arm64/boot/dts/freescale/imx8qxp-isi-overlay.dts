@@ -1,0 +1,139 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+
+
+#include <dt-bindings/clock/imx8-clock.h>
+#include <dt-bindings/clock/imx8-lpcg.h>
+#include <dt-bindings/firmware/imx/rsrc.h>
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&img_subsys>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			img_pxl_clk: clock-img-pxl {
+				compatible = "fixed-clock";
+				#clock-cells = <0>;
+				clock-frequency = <600000000>;
+				clock-output-names = "img_pxl_clk";
+			};
+
+			pdma0_lpcg: clock-controller@58500000 {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x58500000 0x10000>;
+				#clock-cells = <1>;
+				clocks = <&img_pxl_clk>;
+				clock-indices = <IMX_LPCG_CLK_0>;
+				clock-output-names = "pdma0_lpcg_clk";
+				power-domains = <&pd IMX_SC_R_ISI_CH0>;
+			};
+
+			pdma1_lpcg: clock-controller@58510000 {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x58510000 0x10000>;
+				#clock-cells = <1>;
+				clocks = <&img_pxl_clk>;
+				clock-indices = <IMX_LPCG_CLK_0>;
+				clock-output-names = "pdma1_lpcg_clk";
+				power-domains = <&pd IMX_SC_R_ISI_CH1>;
+			};
+
+			pdma2_lpcg: clock-controller@58520000 {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x58520000 0x10000>;
+				#clock-cells = <1>;
+				clocks = <&img_pxl_clk>;
+				clock-indices = <IMX_LPCG_CLK_0>;
+				clock-output-names = "pdma2_lpcg_clk";
+				power-domains = <&pd IMX_SC_R_ISI_CH2>;
+			};
+
+			pdma3_lpcg: clock-controller@58530000 {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x58530000 0x10000>;
+				#clock-cells = <1>;
+				clocks = <&img_pxl_clk>;
+				clock-indices = <IMX_LPCG_CLK_0>;
+				clock-output-names = "pdma3_lpcg_clk";
+				power-domains = <&pd IMX_SC_R_ISI_CH3>;
+			};
+
+			pdma4_lpcg: clock-controller@58540000 {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x58540000 0x10000>;
+				#clock-cells = <1>;
+				clocks = <&img_pxl_clk>;
+				clock-indices = <IMX_LPCG_CLK_0>;
+				clock-output-names = "pdma4_lpcg_clk";
+				power-domains = <&pd IMX_SC_R_ISI_CH4>;
+			};
+
+			pdma5_lpcg: clock-controller@58550000 {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x58550000 0x10000>;
+				#clock-cells = <1>;
+				clocks = <&img_pxl_clk>;
+				clock-indices = <IMX_LPCG_CLK_0>;
+				clock-output-names = "pdma5_lpcg_clk";
+				power-domains = <&pd IMX_SC_R_ISI_CH5>;
+			};
+
+			pdma6_lpcg: clock-controller@58560000 {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x58560000 0x10000>;
+				#clock-cells = <1>;
+				clocks = <&img_pxl_clk>;
+				clock-indices = <IMX_LPCG_CLK_0>;
+				clock-output-names = "pdma6_lpcg_clk";
+				power-domains = <&pd IMX_SC_R_ISI_CH6>;
+			};
+
+			pdma7_lpcg: clock-controller@58570000 {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x58570000 0x10000>;
+				#clock-cells = <1>;
+				clocks = <&img_pxl_clk>;
+				clock-indices = <IMX_LPCG_CLK_0>;
+				clock-output-names = "pdma7_lpcg_clk";
+				power-domains = <&pd IMX_SC_R_ISI_CH7>;
+			};
+
+			isi_0: isi@58100000 {
+				compatible = "fsl,imx8-isi";
+				reg = <0x58100000 0x80000>;
+				interrupts = <GIC_SPI 297 IRQ_TYPE_LEVEL_HIGH>,
+					     <GIC_SPI 298 IRQ_TYPE_LEVEL_HIGH>,
+					     <GIC_SPI 299 IRQ_TYPE_LEVEL_HIGH>,
+					     <GIC_SPI 300 IRQ_TYPE_LEVEL_HIGH>,
+					     <GIC_SPI 301 IRQ_TYPE_LEVEL_HIGH>,
+					     <GIC_SPI 302 IRQ_TYPE_LEVEL_HIGH>,
+					     <GIC_SPI 303 IRQ_TYPE_LEVEL_HIGH>,
+					     <GIC_SPI 304 IRQ_TYPE_LEVEL_HIGH>;
+				interrupt-parent = <&gic>;
+				clocks = <&pdma0_lpcg 0>,
+					 <&pdma1_lpcg 0>,
+					 <&pdma2_lpcg 0>,
+					 <&pdma3_lpcg 0>,
+					 <&pdma4_lpcg 0>,
+					 <&pdma5_lpcg 0>,
+					 <&pdma6_lpcg 0>,
+					 <&pdma7_lpcg 0>;
+				clock-names = "per";
+				power-domains = <&pd IMX_SC_R_ISI_CH0>,
+						<&pd IMX_SC_R_ISI_CH1>,
+						<&pd IMX_SC_R_ISI_CH2>,
+						<&pd IMX_SC_R_ISI_CH3>,
+						<&pd IMX_SC_R_ISI_CH4>,
+						<&pd IMX_SC_R_ISI_CH5>,
+						<&pd IMX_SC_R_ISI_CH6>,
+						<&pd IMX_SC_R_ISI_CH7>;
+				status = "okay";
+			};
+		};
+	};
+};
