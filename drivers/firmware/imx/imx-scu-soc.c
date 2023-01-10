@@ -85,6 +85,7 @@ int imx_scu_soc_init(struct device *dev)
 	int id, ret;
 	u64 uid = 0;
 	u32 val;
+	char *soc_id;
 
 	ret = imx_scu_get_handle(&imx_sc_soc_ipc_handle);
 	if (ret)
@@ -113,7 +114,21 @@ int imx_scu_soc_init(struct device *dev)
 
 	/* format soc_id value passed from SCU firmware */
 	val = id & 0x1f;
-	soc_dev_attr->soc_id = devm_kasprintf(dev, GFP_KERNEL, "0x%x", val);
+	switch (val) {
+	case 0x1:
+		soc_id = "i.MX8QM";
+		break;
+	case 0x2:
+		soc_id = "i.MX8QXP";
+		break;
+	case 0xe:
+		soc_id = "i.MX8DXL";
+		break;
+	default:
+		soc_id = "i.MX8";
+	}
+
+	soc_dev_attr->soc_id = devm_kasprintf(dev, GFP_KERNEL, "%s", soc_id);
 	if (!soc_dev_attr->soc_id)
 		return -ENOMEM;
 
