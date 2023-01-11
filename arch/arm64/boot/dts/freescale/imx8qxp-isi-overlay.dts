@@ -16,6 +16,65 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 
+			csi0_core_lpcg: clock-controller@58223018 {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x58223018 0x4>;
+				#clock-cells = <1>;
+
+				clocks = <&clk IMX_SC_R_CSI_0 IMX_SC_PM_CLK_PER>;
+
+				clock-indices = <IMX_LPCG_CLK_0>;
+
+				clock-output-names = "csi0_lpcg_core_clk";
+				power-domains = <&pd IMX_SC_R_ISI_CH0>;
+			};
+
+			csi0_esc_lpcg: clock-controller@5822301c {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x5822301c 0x4>;
+				#clock-cells = <1>;
+
+				clocks = <&clk IMX_SC_R_CSI_0 IMX_SC_PM_CLK_MISC>;
+
+				clock-indices = <IMX_LPCG_CLK_0>;
+
+				clock-output-names = "csi0_lpcg_esc_clk";
+				power-domains = <&pd IMX_SC_R_ISI_CH0>;
+			};
+
+			csi0_pxl_lpcg: clock-controller@58580000 {
+				compatible = "fsl,imx8qxp-lpcg";
+				reg = <0x58580000 0x10000>;
+				#clock-cells = <1>;
+
+				clocks = <&img_pxl_clk>;
+
+				clock-indices = <IMX_LPCG_CLK_0>;
+
+				clock-output-names = "csi0_lpcg_pxl_clk";
+				power-domains = <&pd IMX_SC_R_CSI_0>;
+			};
+
+			mipi_csi_0: csi@58227000 {
+				compatible = "fsl,imx8qxp-mipi-csi2";
+				reg = <0x58227000 0x1000>;
+
+				clocks = <&csi0_core_lpcg 0>,
+					 <&csi0_esc_lpcg 0>,
+					 <&csi0_pxl_lpcg 0>;
+				clock-names = "clk_core", "clk_esc", "clk_pxl";
+
+				assigned-clocks = <&csi0_core_lpcg 0>,
+						  <&csi0_esc_lpcg 0>;
+				assigned-clock-rates = <360000000>, <72000000>;
+
+				power-domains = <&pd IMX_SC_R_CSI_0>,
+						<&pd IMX_SC_R_ISI_CH0>;
+				power-domains-names = "pd_csi", "pd_isi_ch0";
+
+				status = "ok";
+			};
+
 			img_pxl_clk: clock-img-pxl {
 				compatible = "fixed-clock";
 				#clock-cells = <0>;
