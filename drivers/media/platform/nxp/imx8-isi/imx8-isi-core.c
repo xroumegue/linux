@@ -329,6 +329,43 @@ static const struct mxc_isi_plat_data mxc_imx8_data_v1 = {
 	.has_36bit_dma		= false,
 };
 
+static const struct clk_bulk_data mxc_imx8qxp_clks[] = {
+	{ .id = "pdma0_lpcg_clk" },
+	{ .id = "pdma1_lpcg_clk" },
+	{ .id = "pdma2_lpcg_clk" },
+	{ .id = "pdma3_lpcg_clk" },
+	{ .id = "pdma4_lpcg_clk" },
+	{ .id = "pdma5_lpcg_clk" },
+};
+
+static const struct mxc_isi_plat_data mxc_imx8qxp_data_v0 = {
+	.model			= MXC_ISI_IMX8QXP,
+	.num_ports		= 5,
+	.num_channels		= 6,
+	.reg_offset		= 0x10000,
+	.ier_reg		= &mxc_imx8_isi_ier_v0,
+	.set_thd		= &mxc_imx8_isi_thd_v0,
+	.clks			= mxc_imx8qxp_clks,
+	.num_clks		= ARRAY_SIZE(mxc_imx8qxp_clks),
+	.buf_active_reverse	= false,
+	.has_gasket		= false,
+	.has_36bit_dma		= false,
+};
+
+static const struct mxc_isi_plat_data mxc_imx8qxp_data_v1 = {
+	.model			= MXC_ISI_IMX8QXP,
+	.num_ports		= 5,
+	.num_channels		= 6,
+	.reg_offset		= 0x10000,
+	.ier_reg		= &mxc_imx8_isi_ier_v1,
+	.set_thd		= &mxc_imx8_isi_thd_v1,
+	.clks			= mxc_imx8_clks,
+	.num_clks		= ARRAY_SIZE(mxc_imx8_clks),
+	.buf_active_reverse	= true,
+	.has_gasket		= false,
+	.has_36bit_dma		= false,
+};
+
 static const struct clk_bulk_data mxc_imx8mn_clks[] = {
 	{ .id = "axi" },
 	{ .id = "apb" },
@@ -366,14 +403,15 @@ static const struct soc_device_attribute imx8_soc[] = {
 	{
 		.soc_id   = "i.MX8QXP",
 		.revision = "1.0",
-		.data     = &mxc_imx8_data_v0,
+		.data     = &mxc_imx8qxp_data_v0,
 	}, {
 		.soc_id   = "i.MX8QXP",
 		.revision = "1.1",
-		.data     = &mxc_imx8_data_v0,
+		.data     = &mxc_imx8qxp_data_v0,
 	}, {
 		.soc_id   = "i.MX8QXP",
 		.revision = "1.2",
+		.data     = &mxc_imx8qxp_data_v1,
 	}, {
 		.soc_id   = "i.MX8QM",
 		.revision = "1.0",

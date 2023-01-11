@@ -151,6 +151,7 @@ enum model {
 	MXC_ISI_IMX8,
 	MXC_ISI_IMX8MN,
 	MXC_ISI_IMX8MP,
+	MXC_ISI_IMX8QXP,
 };
 
 struct mxc_isi_plat_data {
