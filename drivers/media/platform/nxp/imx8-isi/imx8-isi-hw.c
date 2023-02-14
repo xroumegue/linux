@@ -514,8 +514,6 @@ void mxc_isi_channel_enable(struct mxc_isi_pipe *pipe)
 	mxc_isi_write(pipe, CHNL_CTRL, val);
 
 	mutex_unlock(&pipe->lock);
-
-	msleep(300);
 }
 
 void mxc_isi_channel_disable(struct mxc_isi_pipe *pipe)

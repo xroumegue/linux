@@ -8,6 +8,7 @@
  * Copyright (c) 2019 NXP Semiconductor
  */
 
+#include <linux/delay.h>
 #include <linux/device.h>
 #include <linux/errno.h>
 #include <linux/interrupt.h>
@@ -284,7 +285,14 @@ int mxc_isi_pipe_enable(struct mxc_isi_pipe *pipe)
 	mxc_isi_channel_config(pipe, input, &in_size, &scale, &crop,
 			       sink_info->encoding, src_info->encoding);
 
+	/*
+	 * FIXME: The BSP has an hard 300msec sleep after enabling the ISI
+	 * channel. While not documented by the TRM keep it here for safety
+	 * as the pipe_enable() function is only called once at start_stream(1)
+	 * time.
+	 */
 	mxc_isi_channel_enable(pipe);
+	msleep(300);
 
 	/* Enable streams on the crossbar switch. */
 	ret = v4l2_subdev_enable_streams(&xbar->sd, xbar->num_sinks + pipe->id,
