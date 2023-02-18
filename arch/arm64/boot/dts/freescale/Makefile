@@ -280,8 +280,12 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mp-ras314-imx219.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mp-ras314-lvds-tm070jvhg33.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mp-ras314-lvds-tm070jvhg33-imx219.dtb
 
+imx8mp-var-dart-csi0-imx296-dtbs := imx8mp-var-dart-dt8mcustomboard-v2.dtb imx8mp-var-dart-csi0-imx296.dtbo
+imx8mp-var-dart-csi1-imx296-dtbs := imx8mp-var-dart-dt8mcustomboard-v2.dtb imx8mp-var-dart-csi1-imx296.dtbo
 imx8mp-var-dart-panel-gktw70sdae4se-dtbs := imx8mp-var-dart-dt8mcustomboard-v2.dtb imx8mp-var-dart-panel-gktw70sdae4se.dtbo
 imx8mp-var-dart-wifi-dtbs := imx8mp-var-dart-dt8mcustomboard-v2.dtb imx8mp-var-dart-wifi.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-var-dart-csi0-imx296.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-var-dart-csi1-imx296.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-var-dart-panel-gktw70sdae4se.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-var-dart-wifi.dtb
 
