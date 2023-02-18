@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+/*
+ * Copyright 2023 Ideas on Board Oy
+ */
+
+&I2C_BUS {
+	VC_CTRL: controller@10 {
+		compatible = "vision-components,mipi-module";
+		reg = <0x10>;
+		#clock-cells = <0>;
+		clock-frequency = <54000000>;
+	};
+
+	camera@1a {
+		compatible = "sony,imx296lq";
+		reg = <0x1a>;
+
+		clocks = <&VC_CTRL>;
+		clock-names = "inck";
+
+		avdd-supply = <&VC_CTRL>;
+		dvdd-supply = <&VC_CTRL>;
+		ovdd-supply = <&VC_CTRL>;
+
+		orientation = <0>;	/* Front */
+		rotation = <0>;
+
+		port {
+			IMX296_EP: endpoint {
+				data-lanes = <1>;
+				remote-endpoint = <&CSI_EP>;
+			};
+		};
+	};
+};
+
+&isi_0 {
+	status = "okay";
+};
+
+&CSI {
+	status = "okay";
+
+	ports {
+		port@0 {
+			CSI_EP: endpoint {
+				remote-endpoint = <&IMX296_EP>;
+				data-lanes = <1>;
+			};
+		};
+	};
+};
