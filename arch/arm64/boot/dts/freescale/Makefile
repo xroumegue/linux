@@ -139,6 +139,7 @@ imx8mm-venice-gw73xx-0x-rs232-rts-dtbs	:= imx8mm-venice-gw73xx-0x.dtb imx8mm-ven
 imx8mm-venice-gw73xx-0x-rs422-dtbs	:= imx8mm-venice-gw73xx-0x.dtb imx8mm-venice-gw73xx-0x-rs422.dtbo
 imx8mm-venice-gw73xx-0x-rs485-dtbs	:= imx8mm-venice-gw73xx-0x.dtb imx8mm-venice-gw73xx-0x-rs485.dtbo
 imx8mp-var-dart-panel-gktw70sdae4se-dtbs := imx8mp-var-dart-dt8mcustomboard-v2.dtb imx8mp-var-dart-panel-gktw70sdae4se.dtbo
+imx8mp-var-dart-wifi-dtbs		:= imx8mp-var-dart-dt8mcustomboard-v2.dtb imx8mp-var-dart-wifi.dtbo
 
 dtb-$(CONFIG_ARCH_MXC) += imx8mm-venice-gw72xx-0x-imx219.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mm-venice-gw72xx-0x-rs232-rts.dtb
@@ -149,6 +150,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mm-venice-gw73xx-0x-rs232-rts.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mm-venice-gw73xx-0x-rs422.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mm-venice-gw73xx-0x-rs485.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-var-dart-panel-gktw70sdae4se.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-var-dart-wifi.dtb
 
 dtb-$(CONFIG_ARCH_S32) += s32g274a-evb.dtb
 dtb-$(CONFIG_ARCH_S32) += s32g274a-rdb2.dtb
