@@ -10,6 +10,6 @@
 
 &gem0 {
 	ethernet_phy: ethernet-phy@0 {
-		reg = <0x0>;
+		reg = <0x3>;
 	};
 };
