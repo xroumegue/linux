@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+/*
+ * Copyright 2023 Ideas on Board Oy
+ */
+
+/dts-v1/;
+/plugin/;
+
+#define CSI		mipi_csi_0
+#define CSI_EP		mipi_csi_0_in
+#define I2C_BUS		i2c2
+#define IMX296_EP	imx296_0_out
+#define VC_CTRL		vc_ctrl_0
+
+#include "imx8mp-var-dart-imx296.dtsi"
