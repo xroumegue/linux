@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&irqsteer_hdmi>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@1 {
+		target = <&hdmi_pvi>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@2 {
+		target = <&lcdif3>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@3 {
+		target = <&hdmi_tx>;
+		__overlay__ {
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_hog>;
+			status = "okay";
+		};
+	};
+
+	fragment@4 {
+		target = <&hdmi_tx_phy>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+};
