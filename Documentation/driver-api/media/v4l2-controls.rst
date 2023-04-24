@@ -647,6 +647,28 @@ Using this function will ensure that you don't need to handle all the complex
 flag and volatile handling.
 
 
+Atomic Control Group Set
+------------------------
+
+The control cluster mechanism allows atomic setting of multiple controls from
+the same cluster. Some devices may support atomic settings of controls on a
+wider scale, making it impractical to use clusters for this purpose as it would
+require putting all controls in the same cluster. For these use cases, the
+control handler supports two operations in :c:type:`v4l2_ctrl_handler_ops`,
+begin() and end(), to notify the driver of the start and end of a
+VIDIOC_S_EXT_CTRLS call.
+
+The begin() operation is called at the beginning of a VIDIOC_S_EXT_CTRLS call,
+after all control values have been validated, and before the first s_ctrl()
+call. If it returns an error, the whole control set is aborted and no controls
+are set. Otherwise, the control framework proceeds to setting controls
+normally. After doing so, it calls the end() operation.
+
+A driver would typically implement the begin() operation by enabling a group
+hold feature in the device, and the end() operation by releasing it, applying
+all control values in one go.
+
+
 VIDIOC_LOG_STATUS Support
 -------------------------
 
