@@ -98,6 +98,12 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ov5640-csi1.dtbo
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore-mx8mp-edimm2.2.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp1.dtbo
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-isp2.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi1-imx296.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi1-imx327.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi1-ov5640.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi2-imx296.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-maivin-csi2-imx327.dtbo
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-msc-sm2s-ep1.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-phyboard-pollux-rdk.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mpxl.dtb
@@ -110,7 +116,14 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-wifi-dev.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-wifi-yavia.dtb
 
 imx8mp-tqma8mpql-mba8mpxl-lvds-dtbs += imx8mp-tqma8mpql-mba8mpxl.dtb imx8mp-tqma8mpql-mba8mpxl-lvds.dtbo
+imx8mp-verdin-dahlia-imx296-dtbs += imx8mp-verdin-nonwifi-dahlia.dtb imx8mp-verdin-dahlia-imx296.dtbo
+imx8mp-verdin-dahlia-imx327-dtbs += imx8mp-verdin-nonwifi-dahlia.dtb imx8mp-verdin-dahlia-imx327.dtbo
+imx8mp-verdin-dahlia-ov5640-dtbs += imx8mp-verdin-nonwifi-dahlia.dtb imx8mp-verdin-dahlia-ov5640.dtbo
+
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mpxl-lvds.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-dahlia-imx296.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-dahlia-imx327.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-dahlia-ov5640.dtb
 
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-hummingboard-pulse.dtb
