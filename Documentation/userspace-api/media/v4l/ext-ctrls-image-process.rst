@@ -55,3 +55,17 @@ Image Process Control IDs
     control value divided by e.g. 0x100, meaning that to get no
     digital gain the control value needs to be 0x100. The no-gain
     configuration is also typically the default.
+
+``V4L2_CID_CCM_CUR (__u32 matrix)``
+    The color correction matrix calculated by the auto white balance algorithm.
+    The values are expressed as S15.16 fixed-point integers and stored in a 3x3
+    array of U32 integers, in RGB order. This control is read-only and volatile.
+
+``V4L2_CID_CCM_CUR_LL (__u32 matrix)``
+    The color correction matrix calculated by the auto white balance algorithm
+    for low-light conditions. The values are expressed as S15.16 fixed-point
+    integers and stored in a 3x3 array of U32 integers, in RGB order. This
+    control is read-only and volatile.
+
+``V4L2_CID_BLC_AUTO (boolean)``
+    Enable or disable automatic black level compensation.
