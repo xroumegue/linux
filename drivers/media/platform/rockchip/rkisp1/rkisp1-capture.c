@@ -1153,7 +1153,9 @@ rkisp1_fill_pixfmt(const struct rkisp1_capture *cap,
 	struct v4l2_plane_pix_format *plane_y = &pixm->plane_fmt[0];
 	const struct v4l2_format_info *info;
 	unsigned int i;
-	u32 stride;
+	u32 stride, bpl_y;
+
+	bpl_y = plane_y->bytesperline;
 
 	memset(pixm->plane_fmt, 0, sizeof(pixm->plane_fmt));
 	info = v4l2_format_info(pixm->pixelformat);
@@ -1164,10 +1166,9 @@ rkisp1_fill_pixfmt(const struct rkisp1_capture *cap,
 	 * the Y plane, and so does the MP in ISP versions that have the
 	 * MAIN_STRIDE feature.
 	 */
-	if (cap->id == RKISP1_SELFPATH ||
-	    rkisp1_has_feature(cap->rkisp1, MAIN_STRIDE))
-		stride = min(DIV_ROUND_UP(plane_y->bytesperline, info->bpp[0]),
-			     pixm->width);
+	if (bpl_y && (cap->id == RKISP1_SELFPATH ||
+	    rkisp1_has_feature(cap->rkisp1, MAIN_STRIDE)))
+		stride = max(DIV_ROUND_UP(bpl_y, info->bpp[0]), pixm->width);
 	else
 		stride = pixm->width;
 
