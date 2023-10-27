@@ -79,10 +79,6 @@
 	};
 };
 
-&isi_0 {
-	status = "okay";
-};
-
 &mipi_csi_0 {
 	status = "okay";
 
