@@ -1,0 +1,82 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2024 Ideas on Board Oy
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/clock/imx8mp-clock.h>
+#include <dt-bindings/gpio/gpio.h>
+#include "imx8mp-pinfunc.h"
+
+#define RPI_CAM_MIPI_AVDD_MICROVOLT	2800000
+#define RPI_CAM_MIPI_DVDD_MICROVOLT	1200000
+#define RPI_CAM_MIPI_USE_AP1302		0
+
+#include "imx8mp-debix-model-a-rpi-cam.dtsi"
+
+#if RPI_CAM_MIPI_USE_AP1302
+
+&cam_ap1302 {
+	sensors {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		onnn,model = "onnn,ar0144";
+
+		sensor@0 {
+			reg = <0>;
+
+			onnn,sip-addr = <0x10>;
+			onnn,sip-port = <0>;
+
+			vaa-supply = <&cam_reg_avdd>;
+			vdd-supply = <&cam_reg_dvdd>;
+			vddio-supply = <&cam_reg_vddio>;
+
+			data-lanes = <1 2>;
+		};
+	};
+};
+
+#else
+
+&i2c2 {
+	camera@10 {
+		compatible = "onnn,ar0144c";
+		reg = <0x10>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_csi0_rst>;
+
+		clocks = <&cam_clk>;
+
+		reset-gpios = <&gpio2 11 GPIO_ACTIVE_LOW>;
+
+		vaa-supply = <&cam_reg_avdd>;
+		vdd-supply = <&cam_reg_dvdd>;
+		vddio-supply = <&cam_reg_vddio>;
+
+		rotation = <0>;
+		orientation = <2>; /* External camera */
+
+		port {
+			ar0144_out: endpoint {
+				remote-endpoint = <&mipi_csi_0_in>;
+				data-lanes = <1 2>;
+				clock-noncontinuous;
+				link-frequencies = /bits/ 64 <185625000 222750000>;
+			};
+		};
+
+	};
+};
+
+&mipi_csi_0_in {
+	remote-endpoint = <&ar0144_out>;
+	clock-lanes = <0>;
+	data-lanes = <1 2>;
+};
+
+#endif
