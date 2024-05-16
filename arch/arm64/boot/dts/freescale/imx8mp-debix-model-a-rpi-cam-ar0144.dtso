@@ -1,0 +1,257 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2024 Ideas on Board Oy
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/clock/imx8mp-clock.h>
+#include <dt-bindings/gpio/gpio.h>
+#include "imx8mp-pinfunc.h"
+
+#define RPI_CAM_MIPI_AVDD_MICROVOLT	2800000
+#define RPI_CAM_MIPI_DVDD_MICROVOLT	1200000
+#define RPI_CAM_MIPI_USE_AP1302		0
+
+&{/} {
+	cam_clk: clock-cam-y1 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <27000000>;
+	};
+
+	cam_reg_avdd: regulator-cam-avdd {
+		compatible = "regulator-gpio";
+
+		regulator-name = "AVDD_2V7";
+		regulator-min-microvolt = <RPI_CAM_MIPI_AVDD_MICROVOLT>;
+		regulator-max-microvolt = <RPI_CAM_MIPI_AVDD_MICROVOLT>;
+
+		enable-gpio = <&cam_expander 8 GPIO_ACTIVE_HIGH>;
+		gpios = <&cam_expander 1 GPIO_ACTIVE_HIGH>;
+		gpios-states = <0>;
+		states = <2700000 0>, <2800000 1>;
+
+		startup-delay-us = <200>;
+		enable-active-high;
+	};
+
+	cam_reg_dvdd: regulator-cam-dvdd {
+		compatible = "regulator-gpio";
+
+		regulator-name = "DVDD_1V2";
+		regulator-min-microvolt = <RPI_CAM_MIPI_DVDD_MICROVOLT>;
+		regulator-max-microvolt = <RPI_CAM_MIPI_DVDD_MICROVOLT>;
+
+		enable-gpio = <&cam_expander 7 GPIO_ACTIVE_HIGH>;
+		gpios = <&cam_expander 0 GPIO_ACTIVE_HIGH>;
+		gpios-states = <0>;
+		states = <1050000 0>, <1200000 1>;
+
+		startup-delay-us = <2000>;
+		enable-active-high;
+	};
+
+	cam_reg_isp_iovdd: regulator-cam-isp-iovdd {
+		compatible = "regulator-fixed";
+
+		regulator-name = "ISP_IOVDD_1V8";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+
+		gpio = <&cam_expander 10 GPIO_ACTIVE_HIGH>;
+
+		startup-delay-us = <250>;
+		enable-active-high;
+		vin-supply = <&cam_reg_vddio>;
+	};
+
+	cam_reg_vcm: regulator-cam-vcm {
+		compatible = "regulator-fixed";
+
+		regulator-name = "AVDD_2V8";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+
+		gpio = <&cam_expander 9 GPIO_ACTIVE_HIGH>;
+
+		startup-delay-us = <250>;
+		enable-active-high;
+	};
+
+	cam_reg_vdd_af: regulator-cam-vdd-af {
+		compatible = "regulator-fixed";
+
+		regulator-name = "VDD_AF";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+
+		gpio = <&cam_expander 4 GPIO_ACTIVE_HIGH>;
+
+		startup-delay-us = <250>;
+		enable-active-high;
+		vin-supply = <&cam_reg_vcm>;
+	};
+
+	cam_reg_vddio: regulator-cam-vddio {
+		compatible = "regulator-fixed";
+
+		regulator-name = "VDDIO_1V8";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+
+		gpio = <&cam_expander 6 GPIO_ACTIVE_HIGH>;
+
+		startup-delay-us = <500>;
+		enable-active-high;
+	};
+};
+
+&i2c2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	clock-frequency = <100000>;
+	status = "okay";
+
+	camera@10 {
+		compatible = "onnn,ar0144c";
+		reg = <0x10>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_csi0_rst>;
+
+		clocks = <&cam_clk>;
+
+		reset-gpios = <&gpio2 11 GPIO_ACTIVE_LOW>;
+
+		vaa-supply = <&cam_reg_avdd>;
+		vdd-supply = <&cam_reg_dvdd>;
+		vddio-supply = <&cam_reg_vddio>;
+
+		rotation = <0>;
+		orientation = <2>; /* External camera */
+
+#if RPI_CAM_MIPI_USE_AP1302
+		status = "disabled";
+#else
+		port {
+			ar0144_out: endpoint {
+				remote-endpoint = <&mipi_csi_0_in>;
+				data-lanes = <1 2>;
+				clock-noncontinuous;
+				link-frequencies = /bits/ 64 <185625000 222750000>;
+			};
+		};
+#endif
+	};
+
+	cam_expander: mfd@34 {
+		compatible = "adi,adp5585-01", "adi,adp5585";
+		reg = <0x34>;
+
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		#pwm-cells = <3>;
+
+		isp-byp-hog {
+			gpio-hog;
+			gpios = <2 GPIO_ACTIVE_HIGH>;
+#if RPI_CAM_MIPI_USE_AP1302
+			output-high;
+#else
+			output-low;
+#endif
+		};
+	};
+
+	isp@3c {
+		compatible = "onnn,ap1302";
+		reg = <0x3c>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_csi0_rst>;
+
+		clocks = <&cam_clk>;
+
+		reset-gpios = <&gpio2 11 GPIO_ACTIVE_LOW>;
+		standby-gpios = <&cam_expander 5 GPIO_ACTIVE_HIGH>;
+
+		dvdd-supply = <&cam_reg_dvdd>;
+		iovdd-supply = <&cam_reg_isp_iovdd>;
+
+#if !RPI_CAM_MIPI_USE_AP1302
+		status = "disabled";
+#else
+		port {
+			ap1302_out: endpoint {
+				remote-endpoint = <&mipi_csi_0_in>;
+				data-lanes = <1 2 3 4>;
+				clock-noncontinuous;
+				link-frequencies = /bits/ 64 <456000000>;
+			};
+		};
+
+		sensors {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			onnn,model = "onnn,ar0144";
+
+			sensor@0 {
+				reg = <0>;
+
+				onnn,sip-addr = <0x10>;
+				onnn,sip-port = <0>;
+
+				vaa-supply = <&cam_reg_avdd>;
+				vdd-supply = <&cam_reg_dvdd>;
+				vddio-supply = <&cam_reg_vddio>;
+
+				data-lanes = <1 2>;
+			};
+		};
+#endif
+	};
+
+	flash@67 {
+		compatible = "mps,mp3331";
+		reg = <0x67>;
+
+		torch-gpios = <&cam_expander 3 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&iomuxc {
+	pinctrl_csi0_rst: csi0_rst_grp {
+		fsl,pins = <
+			MX8MP_IOMUXC_SD1_STROBE__GPIO2_IO11	0x19
+		>;
+	};
+};
+
+&isi_0 {
+	status = "okay";
+};
+
+&mipi_csi_0 {
+	status = "okay";
+
+	ports {
+		port@0 {
+			mipi_csi_0_in: endpoint {
+#if RPI_CAM_MIPI_USE_AP1302
+				remote-endpoint = <&ap1302_out>;
+				clock-lanes = <0>;
+				data-lanes = <1 2 3 4>;
+#else
+				remote-endpoint = <&ar0144_out>;
+				clock-lanes = <0>;
+				data-lanes = <1 2>;
+#endif
+			};
+		};
+	};
+};
