@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2023 Ideas on Board Oy
+ *
+ * Device tree overlay for the PHYTEC VM-016 camera module connected to an
+ * i.MX8MM Polis development kit.
+ */
+
+/dts-v1/;
+/plugin/;
+
+&{/} {
+	ar0144_clk: ar0144-clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <27000000>;
+	};
+};
+
+&csi {
+	status = "okay";
+};
+
+&i2c4 {
+	status = "okay";
+
+	camera@10 {
+		compatible = "onsemi,ar0144";
+		reg = <0x10>;
+
+		clocks = <&ar0144_clk>;
+
+		port {
+			ar0144_ep: endpoint {
+				remote-endpoint = <&mipi_csi_ep>;
+				data-lanes = <1 2>;
+				clock-noncontinuous = <1>;
+				link-frequencies = /bits/ 64 <222750000>;
+				onsemi,t-hs-prep = <1>;
+				onsemi,t-clk-post = <9>;
+			};
+		};
+	};
+
+	eeprom@56 {
+		compatible = "st,24c02", "atmel,24c02";
+		reg = <0x56>;
+		page-size = <16>;
+	};
+};
+
+&mipi_csi {
+	status = "okay";
+
+	ports {
+		port@0 {
+			mipi_csi_ep: endpoint {
+				remote-endpoint = <&ar0144_ep>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+};
