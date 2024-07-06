@@ -1115,9 +1115,10 @@ properties:
           - const: polyhex,imx8mp-debix-som-a       # Polyhex Debix SOM A
           - const: fsl,imx8mp
 
-      - description: Toradex Boards with Verdin iMX8M Plus Modules
+      - description: Boards using Toradex Verdin iMX8M Plus Modules
         items:
           - enum:
+              - au-zone,maivin-starter-kit           # Au-Zone Maivin AI Vision Starter Kit
               - toradex,verdin-imx8mp-nonwifi-dahlia # Verdin iMX8M Plus Module on Dahlia
               - toradex,verdin-imx8mp-nonwifi-dev    # Verdin iMX8M Plus Module on Verdin Development Board
               - toradex,verdin-imx8mp-nonwifi-mallow # Verdin iMX8M Plus Module on Mallow
