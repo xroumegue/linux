@@ -108,9 +108,8 @@ static int vc_mipi_regulator_init(struct vc_mipi_ctrl *ctrl)
 	config.regmap = ctrl->regmap;
 
 	rdev = devm_regulator_register(ctrl->dev, &vc_mipi_regulator, &config);
-	if (IS_ERR(rdev)) {
+	if (IS_ERR(rdev))
 		return PTR_ERR(rdev);
-	}
 
 	return 0;
 }
