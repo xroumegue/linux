@@ -98,12 +98,19 @@ static const struct regulator_desc vc_mipi_regulator = {
 	.owner = THIS_MODULE,
 };
 
+static const struct regulator_init_data vc_mipi_regulator_init_data = {
+	.constraints = {
+		.valid_ops_mask = REGULATOR_CHANGE_STATUS,
+	},
+};
+
 static int vc_mipi_regulator_init(struct vc_mipi_ctrl *ctrl)
 {
 	struct regulator_config config = { };
 	struct regulator_dev *rdev;
 
 	config.dev = ctrl->dev;
+	config.init_data = &vc_mipi_regulator_init_data;
 	config.of_node = ctrl->dev->of_node;
 	config.regmap = ctrl->regmap;
 
