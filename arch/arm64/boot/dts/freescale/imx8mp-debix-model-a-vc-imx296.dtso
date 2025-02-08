@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2025 Ideas on Board Oy
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include "imx8mp-pinfunc.h"
+
+&i2c2 {
+	status = "okay";
+
+	vc_ctrl: controller@10 {
+		compatible = "vision-components,mipi-module-controller";
+		reg = <0x10>;
+		#clock-cells = <0>;
+		clock-frequency = <54000000>;
+	};
+
+	camera@1a {
+		compatible = "sony,imx296ll";
+		reg = <0x1a>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_csi0_rst>;
+
+		clocks = <&vc_ctrl>;
+		clock-names = "inck";
+
+		avdd-supply = <&vc_ctrl>;
+		dvdd-supply = <&vc_ctrl>;
+		ovdd-supply = <&vc_ctrl>;
+
+		orientation = <2>; /* External camera */
+		rotation = <0>;
+
+		port {
+			imx296_out: endpoint {
+				data-lanes = <1>;
+				remote-endpoint = <&mipi_csi_0_in>;
+			};
+		};
+	};
+};
+
+&iomuxc {
+	pinctrl_csi0_rst: csi0_rst_grp {
+		fsl,pins = <
+			MX8MP_IOMUXC_SD1_STROBE__GPIO2_IO11	0x19
+		>;
+	};
+};
+
+&isi_0 {
+	status = "okay";
+};
+
+&mipi_csi_0 {
+	status = "okay";
+
+	ports {
+		port@0 {
+			mipi_csi_0_in: endpoint {
+				remote-endpoint = <&imx296_out>;
+				data-lanes = <1>;
+			};
+		};
+	};
+};
