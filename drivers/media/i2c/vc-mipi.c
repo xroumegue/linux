@@ -36,6 +36,7 @@ struct vc_mipi_ctrl {
 	struct regmap *regmap;
 	struct regulator *supply;
 	struct clk_hw *clk_hw;
+	bool enabled;
 };
 
 /* -----------------------------------------------------------------------------
@@ -44,6 +45,7 @@ struct vc_mipi_ctrl {
 
 static int vc_mipi_regulator_enable(struct regulator_dev *rdev)
 {
+	struct vc_mipi_ctrl *ctrl = rdev->reg_data;
 	unsigned int val;
 	int ret;
 
@@ -63,26 +65,30 @@ static int vc_mipi_regulator_enable(struct regulator_dev *rdev)
 		return -EIO;
 	}
 
+	ctrl->enabled = true;
+
 	return 0;
 }
 
 static int vc_mipi_regulator_disable(struct regulator_dev *rdev)
 {
-	return regmap_write(rdev->regmap, VC_MIPI_REG_RESET,
-			    VC_MIPI_REG_RESET_POWER_DOWN |
-			    VC_MIPI_REG_RESET_RESET);
+	struct vc_mipi_ctrl *ctrl = rdev->reg_data;
+	int ret;
+
+	ret = regmap_write(rdev->regmap, VC_MIPI_REG_RESET,
+			   VC_MIPI_REG_RESET_POWER_DOWN |
+			   VC_MIPI_REG_RESET_RESET);
+
+	ctrl->enabled = false;
+
+	return ret;
 }
 
 static int vc_mipi_regulator_is_enabled(struct regulator_dev *rdev)
 {
-	unsigned int val;
-	int ret;
+	struct vc_mipi_ctrl *ctrl = rdev->reg_data;
 
-	ret = regmap_read(rdev->regmap, VC_MIPI_REG_RESET, &val);
-	if (ret < 0)
-		return ret;
-
-	return !(val & VC_MIPI_REG_RESET_POWER_DOWN);
+	return ctrl->enabled;
 }
 
 static const struct regulator_ops vc_mipi_regulator_ops = {
@@ -111,6 +117,7 @@ static int vc_mipi_regulator_init(struct vc_mipi_ctrl *ctrl)
 
 	config.dev = ctrl->dev;
 	config.init_data = &vc_mipi_regulator_init_data;
+	config.driver_data = ctrl;
 	config.of_node = ctrl->dev->of_node;
 	config.regmap = ctrl->regmap;
 
