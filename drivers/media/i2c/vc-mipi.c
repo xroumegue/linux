@@ -10,6 +10,8 @@
 #include <linux/err.h>
 #include <linux/i2c.h>
 #include <linux/module.h>
+#include <linux/pm.h>
+#include <linux/pm_runtime.h>
 #include <linux/regmap.h>
 #include <linux/regulator/consumer.h>
 #include <linux/regulator/driver.h>
@@ -49,25 +51,35 @@ static int vc_mipi_regulator_enable(struct regulator_dev *rdev)
 	unsigned int val;
 	int ret;
 
+	ret = pm_runtime_resume_and_get(ctrl->dev);
+	if (ret)
+		return ret;
+
 	ret = regmap_write(rdev->regmap, VC_MIPI_REG_RESET, 0);
 	if (ret < 0)
-		return ret;
+		goto error;
 
 	msleep(500);
 
 	ret = regmap_read(rdev->regmap, VC_MIPI_REG_STATUS, &val);
 	if (ret < 0)
-		return ret;
+		goto error;
 
 	if (val != VC_MIPI_REG_STATUS_ON) {
 		dev_err(&rdev->dev, "Sensor failed to initialize (0x%02x)\n",
 			val);
-		return -EIO;
+		ret = -EIO;
+		goto error;
 	}
 
 	ctrl->enabled = true;
 
 	return 0;
+
+error:
+	pm_runtime_mark_last_busy(ctrl->dev);
+	pm_runtime_put_autosuspend(ctrl->dev);
+	return ret;
 }
 
 static int vc_mipi_regulator_disable(struct regulator_dev *rdev)
@@ -78,6 +90,9 @@ static int vc_mipi_regulator_disable(struct regulator_dev *rdev)
 	ret = regmap_write(rdev->regmap, VC_MIPI_REG_RESET,
 			   VC_MIPI_REG_RESET_POWER_DOWN |
 			   VC_MIPI_REG_RESET_RESET);
+
+	pm_runtime_mark_last_busy(ctrl->dev);
+	pm_runtime_put_autosuspend(ctrl->dev);
 
 	ctrl->enabled = false;
 
@@ -174,6 +189,37 @@ static void vc_mipi_clk_cleanup(struct vc_mipi_ctrl *ctrl)
 }
 
 /* -----------------------------------------------------------------------------
+ * Power management
+ */
+
+static int vc_mipi_power_on(struct device *dev)
+{
+	struct vc_mipi_ctrl *ctrl = dev_get_drvdata(dev);
+	int ret;
+
+	ret = regulator_enable(ctrl->supply);
+	if (ret < 0) {
+		dev_err(ctrl->dev, "Failed to enable vcc supply: %d\n", ret);
+		return ret;
+	}
+
+	return 0;
+}
+
+static int vc_mipi_power_off(struct device *dev)
+{
+	struct vc_mipi_ctrl *ctrl = dev_get_drvdata(dev);
+
+	regulator_disable(ctrl->supply);
+
+	return 0;
+}
+
+static const struct dev_pm_ops vc_mipi_pm_ops = {
+	SET_RUNTIME_PM_OPS(vc_mipi_power_off, vc_mipi_power_on, NULL)
+};
+
+/* -----------------------------------------------------------------------------
  * Probe & Remove
  */
 
@@ -252,39 +298,46 @@ static int vc_mipi_i2c_probe(struct i2c_client *i2c)
 		return ret;
 	}
 
-	ret = regulator_enable(ctrl->supply);
-	if (ret < 0) {
-		dev_err(ctrl->dev, "Failed to enable vcc supply: %d\n", ret);
-		return ret;
-	}
-
 	ctrl->regmap = devm_regmap_init_i2c(i2c, &vc_mipi_regmap_config);
 	if (IS_ERR(ctrl->regmap)) {
 		ret = PTR_ERR(ctrl->regmap);
 		dev_err(ctrl->dev, "Failed to init regmap: %d\n", ret);
-		goto error;
+		return ret;
 	}
+
+	ret = vc_mipi_power_on(ctrl->dev);
+	if (ret < 0)
+		return ret;
 
 	ret = vc_mipi_identify(ctrl);
 	if (ret < 0)
-		goto error;
+		goto err_power;
 
 	ret = vc_mipi_regulator_init(ctrl);
 	if (ret < 0) {
 		dev_err(ctrl->dev, "Failed to register regulator\n");
-		goto error;
+		goto err_power;
 	}
 
 	ret = vc_mipi_clk_init(ctrl);
 	if (ret < 0) {
 		dev_err(ctrl->dev, "Failed to register clock\n");
-		goto error;
+		goto err_power;
 	}
+
+	/* Enable runtime PM and turn off the device. */
+	pm_runtime_set_active(ctrl->dev);
+	pm_runtime_get_noresume(ctrl->dev);
+	pm_runtime_enable(ctrl->dev);
+	pm_runtime_set_autosuspend_delay(ctrl->dev, 1000);
+	pm_runtime_use_autosuspend(ctrl->dev);
+	pm_runtime_mark_last_busy(ctrl->dev);
+	pm_runtime_put_autosuspend(ctrl->dev);
 
 	return 0;
 
-error:
-	regulator_disable(ctrl->supply);
+err_power:
+	vc_mipi_power_off(ctrl->dev);
 	return ret;
 }
 
@@ -293,7 +346,11 @@ static void vc_mipi_i2c_remove(struct i2c_client *i2c)
 	struct vc_mipi_ctrl *ctrl = i2c_get_clientdata(i2c);
 
 	vc_mipi_clk_cleanup(ctrl);
-	regulator_disable(ctrl->supply);
+
+	pm_runtime_disable(ctrl->dev);
+	if (!pm_runtime_status_suspended(ctrl->dev))
+		vc_mipi_power_off(ctrl->dev);
+	pm_runtime_set_suspended(ctrl->dev);
 }
 
 static const struct of_device_id vc_mipi_dt_ids[] = {
@@ -306,6 +363,7 @@ static struct i2c_driver vc_mipi_driver = {
 	.driver = {
 		.name = "vc-mipi",
 		.of_match_table = vc_mipi_dt_ids,
+		.pm = &vc_mipi_pm_ops,
 	},
 	.probe = vc_mipi_i2c_probe,
 	.remove = vc_mipi_i2c_remove,
