@@ -354,7 +354,7 @@ static void vc_mipi_i2c_remove(struct i2c_client *i2c)
 }
 
 static const struct of_device_id vc_mipi_dt_ids[] = {
-	{ .compatible = "vision-components,mipi-module" },
+	{ .compatible = "vision-components,mipi-module-controller" },
 	{},
 };
 MODULE_DEVICE_TABLE(of, vc_mipi_dt_ids);
