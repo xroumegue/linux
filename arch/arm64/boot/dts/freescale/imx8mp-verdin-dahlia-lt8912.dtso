@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Copyright 2025 Ideas on Board Oy
+ * Copyright 2020-2021 Toradex
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+&hdmi_lontium_lt8912 {
+	ddc-i2c-bus = <&i2c2>;
+	/* Verdin PWM_3_DSI (SODIMM 19) */
+	hpd-gpios = <&gpio3 20 GPIO_ACTIVE_HIGH>;
+
+	port {
+		lt8912_1_in: endpoint {
+			remote-endpoint = <&mipi_dsi_out>;
+		};
+	};
+};
+
+&hdmi_pvi {
+	status = "disabled";
+};
+
+&hdmi_tx {
+	status = "disabled";
+};
+
+&hdmi_tx_phy {
+	status = "disabled";
+};
+
+/* LCDIF to MIPI-DSI */
+&lcdif1 {
+	status = "okay";
+};
+
+&lcdif3 {
+	status = "disabled";
+};
+
+&mipi_dsi {
+	status = "okay";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@1 {
+			reg = <1>;
+			mipi_dsi_out: endpoint {
+				remote-endpoint = <&lt8912_1_in>;
+			};
+		};
+	};
+};
+
+&pwm3 {
+	/* PWM 3 conflicts with the HPD signal from the adapter */
+	status = "disabled";
+};
