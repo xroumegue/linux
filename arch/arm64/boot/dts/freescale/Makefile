@@ -196,6 +196,23 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-aristainetos3-proton2s.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-beacon-kit.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-data-modul-edm-sbc.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-io-imx219.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-io-ov5640.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-rpi-cam-ar0144.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-vc-imx296.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-vc-imx327.dtbo
+
+imx8mp-debix-model-a-io-imx219-dtbs		:= imx8mp-debix-model-a.dtb imx8mp-debix-model-a-io-imx219.dtbo
+imx8mp-debix-model-a-io-ov5640-dtbs		:= imx8mp-debix-model-a.dtb imx8mp-debix-model-a-io-ov5640.dtbo
+imx8mp-debix-model-a-rpi-cam-ar0144-dtbs	:= imx8mp-debix-model-a.dtb imx8mp-debix-model-a-rpi-cam-ar0144.dtbo
+imx8mp-debix-model-a-vc-imx296-dtbs		:= imx8mp-debix-model-a.dtb imx8mp-debix-model-a-vc-imx296.dtbo
+imx8mp-debix-model-a-vc-imx327-dtbs		:= imx8mp-debix-model-a.dtb imx8mp-debix-model-a-vc-imx327.dtbo
+
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-io-imx219.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-io-ov5640.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-rpi-cam-ar0144.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-vc-imx296.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-model-a-vc-imx327.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-debix-som-a-bmb-08.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-dhcom-drc02.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-dhcom-pdk2.dtb
