@@ -316,6 +316,16 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-var-dart-csi1-imx296.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-var-dart-panel-gktw70sdae4se.dtb
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-var-dart-wifi.dtb
 
+imx8mp-verdin-dahlia-imx296-dtbs += imx8mp-verdin-nonwifi-dahlia.dtb imx8mp-verdin-dahlia-imx296.dtbo
+imx8mp-verdin-dahlia-imx327-dtbs += imx8mp-verdin-nonwifi-dahlia.dtb imx8mp-verdin-dahlia-imx327.dtbo
+imx8mp-verdin-dahlia-ov5640-dtbs += imx8mp-verdin-nonwifi-dahlia.dtb imx8mp-verdin-dahlia-ov5640.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-dahlia-imx296.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-dahlia-imx327.dtb
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-dahlia-ov5640.dtb
+
+imx8mp-verdin-dahlia-lt8912-dtbs += imx8mp-verdin-nonwifi-dahlia.dtb imx8mp-verdin-dahlia-lt8912.dtbo
+dtb-$(CONFIG_ARCH_MXC) += imx8mp-verdin-dahlia-lt8912.dtb
+
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk.dtb
 imx8mq-evk-pcie1-ep-dtbs += imx8mq-evk.dtb imx-pcie1-ep.dtbo
 dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-pcie1-ep.dtb
