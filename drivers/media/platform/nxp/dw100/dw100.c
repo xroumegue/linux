@@ -52,6 +52,9 @@
 #define DW100_MAX_CTRLS			1
 #define DW100_CTRL_DEWARPING_MAP	0
 
+static unsigned int timeout = 200000u;
+module_param(timeout, int, 0660);
+
 enum {
 	DW100_QUEUE_SRC = 0,
 	DW100_QUEUE_DST = 1,
@@ -1143,6 +1146,19 @@ static void _dw100_hw_set_master_bus_enable(struct dw100_device *dw_dev,
 	dw100_write(dw_dev, DW100_BUS_CTRL, val);
 }
 
+static void dw100_hw_master_set_timeout(struct dw100_device *dw_dev, unsigned int timeout)
+{
+	u32 val;
+
+	dev_dbg(&dw_dev->pdev->dev, "Set AXI master timeout value to %x\n", timeout);
+
+	dw100_write(dw_dev, DW100_BUS_TIME_OUT_CYCLE, timeout);
+
+	val = dw100_read(dw_dev, DW100_BUS_CTRL);
+	val |= DW100_BUS_CTRL_AXI_MASTER_TIMEOUT_OVERRIDE;
+	dw100_write(dw_dev, DW100_BUS_CTRL, val);
+}
+
 static void dw100_hw_master_bus_enable(struct dw100_device *dw_dev)
 {
 	_dw100_hw_set_master_bus_enable(dw_dev, 1);
@@ -1472,6 +1488,7 @@ static void dw100_start(struct dw100_ctx *ctx, struct vb2_v4l2_buffer *in_vb,
 				 &out_vb->vb2_buf);
 	dw100_hw_set_mapping(dw_dev, ctx->map_dma,
 			     ctx->map_width, ctx->map_height);
+	dw100_hw_master_set_timeout(dw_dev, timeout);
 	dw100_hw_enable_irq(dw_dev);
 	dw100_hw_dewarp_start(dw_dev);
 
