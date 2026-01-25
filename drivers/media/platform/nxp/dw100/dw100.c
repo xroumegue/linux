@@ -77,6 +77,7 @@ struct dw100_device {
 	struct clk_bulk_data		*clks;
 	int				num_clks;
 	struct dentry			*debugfs_root;
+	unsigned int			hw_irq_status;
 };
 
 struct dw100_q_data {
@@ -1425,13 +1426,29 @@ static u32 dw_hw_get_pending_irqs(struct dw100_device *dw_dev)
 	return DW100_INTERRUPT_STATUS_INT_STATUS(val);
 }
 
+static irqreturn_t dw100_irq_hard_handler(int irq, void *dev_id)
+{
+	struct dw100_device *dw_dev = dev_id;
+	u32 pending_irqs;
+
+	dw100_hw_disable_irq(dw_dev);
+	dw100_hw_master_bus_disable(dw_dev);
+	pending_irqs = dw_hw_get_pending_irqs(dw_dev);
+	dw100_hw_clear_irq(dw_dev, pending_irqs);
+
+	dw_dev->hw_irq_status = pending_irqs;
+
+	return IRQ_WAKE_THREAD;
+}
+
 static irqreturn_t dw100_irq_handler(int irq, void *dev_id)
 {
 	struct dw100_device *dw_dev = dev_id;
 	u32 pending_irqs, err_irqs, frame_done_irq;
 	bool with_error = true;
 
-	pending_irqs = dw_hw_get_pending_irqs(dw_dev);
+	pending_irqs = dw_dev->hw_irq_status;
+
 	frame_done_irq = pending_irqs & DW100_INTERRUPT_STATUS_INT_FRAME_DONE;
 	err_irqs = DW100_INTERRUPT_STATUS_INT_ERR_STATUS(pending_irqs);
 
@@ -1444,11 +1461,6 @@ static irqreturn_t dw100_irq_handler(int irq, void *dev_id)
 
 	if (err_irqs)
 		dev_err(&dw_dev->pdev->dev, "Interrupt error: %#x\n", err_irqs);
-
-	dw100_hw_disable_irq(dw_dev);
-	dw100_hw_master_bus_disable(dw_dev);
-	dw100_hw_clear_irq(dw_dev, pending_irqs |
-			   DW100_INTERRUPT_STATUS_INT_ERR_TIME_OUT);
 
 	dw100_job_finish(dw_dev, with_error);
 
@@ -1617,8 +1629,8 @@ static int dw100_probe(struct platform_device *pdev)
 
 	pm_runtime_put_sync(&pdev->dev);
 
-	ret = devm_request_irq(&pdev->dev, irq, dw100_irq_handler, 0,
-			       dev_name(&pdev->dev), dw_dev);
+	ret = devm_request_threaded_irq(&pdev->dev, irq, dw100_irq_hard_handler,
+				 dw100_irq_handler, 0, dev_name(&pdev->dev), dw_dev);
 	if (ret < 0) {
 		dev_err(&pdev->dev, "Failed to request irq: %d\n", ret);
 		goto err_pm;
